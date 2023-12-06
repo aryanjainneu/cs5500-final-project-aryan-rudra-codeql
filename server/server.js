@@ -5,11 +5,48 @@ const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./src/routes')
 const cors = require('cors');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+// const MongoDBStore = require('connect-mongodb-session')(session);
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
+
+// var store = new MongoDBStore({
+//   uri: 'mongodb://127.0.0.1:27017/fake_so',
+//   collection: 'sessions'
+// });
+
+
+// app.use(session({
+//   secret: '98gdec23rdfwlsmjd4g43tazwdosr345',
+//   resave: false,
+//   saveUninitialized: false,
+//   store: store,
+//   cookie: {
+//     httpOnly: true,
+//     secure: false, // Set to true if using HTTPS
+//   }
+// }));
+
+app.use(session({
+  secret: '98gdec23rdfwlsmjd4g43tazwdosr345',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ 
+    mongoUrl: 'mongodb://127.0.0.1:27017/fake_so', // Replace with your MongoDB URL
+    collectionName: 'sessions' // Optional, 'sessions' by default
+  }),
+  cookie: {
+    httpOnly: true,
+    secure: false, // Set to true if using HTTPS
+  }
+}));
 app.use('/api', routes);
+
+
 mongoose.connect('mongodb://127.0.0.1:27017/fake_so', {
   useNewUrlParser: true,
   useUnifiedTopology: true

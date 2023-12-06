@@ -1,0 +1,180 @@
+
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: violet;
+  }
+  
+  .leftColumn {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height : 100%;
+  }
+  
+  .rightColumn {
+    flex: 1;
+    display: flex;
+    background-color: white;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+    padding: 2rem;
+    height : 100%;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+  }
+  
+  .button {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 10px;
+    background-color: #5f3dc4;
+    color: white;
+    margin-top: 1rem;
+    cursor: pointer;
+  }
+  
+  .link {
+    text-align: center;
+    margin-top: 2rem;
+    color: #5f3dc4;
+    cursor: pointer;
+  }
+  
+
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+    }
+  
+    .leftColumn,
+    .rightColumn {
+      width: 100%;
+      max-width: none;
+    }
+  }
+
+  .page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: violet;
+  }
+  
+  
+  .rectangle {
+    height: 70%; /* 70% of the viewport height */
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around; /* This will distribute the space evenly between the child elements */
+  }
+
+  .optionsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    text-align: center;
+    height: 80%;
+    width: 60%;
+    padding: 2rem; /* Add padding inside the container */
+    margin: 2rem; /* Add some margin around the container */
+    background: #fff; /* Set a background color */
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Drop shadow */
+
+  }
+
+  .btn-3d {
+    background-color: #6d2d7d; /* Bootstrap primary color */
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    box-shadow: 0 5px black; /* Darker shade for 3D effect */
+    transition: all 0.3s ease;
+  }
+  
+  .btn-3d:hover {
+    background-color: #0056b3;
+    box-shadow: 0 2px #003d75; /* Even darker for pressed effect */
+    transform: translateY(3px); /* Pushes the button down */
+  }
+  
+  .btn-3d:active {
+    box-shadow: 0 1px #003d75;
+    transform: translateY(4px); /* More pushed down effect */
+  }
+  
+
+
+  .loginContainer {
+    display: flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content: space-around;
+    text-align:center;
+    height: 80%;
+    width: 60%;
+    padding: 2rem; /* Add padding inside the container */
+    margin: 2rem; /* Add some margin around the container */
+    background: #fff; /* Set a background color */
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Drop shadow */
+
+  }
+
+  .loginInput{
+    width: 100%;
+  }
+
+  .backButton {
+    border: none;
+    background: none;
+    color: #007bff; /* Or any color that matches your design */
+    font-size: 1.2em;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .form{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    justify-content: space-evenly;
+  }
+
+  .error{
+    color: red;
+  }

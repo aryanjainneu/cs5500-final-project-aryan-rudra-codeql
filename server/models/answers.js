@@ -3,7 +3,10 @@ const mongoose = require('mongoose');
 const answerSchema = new mongoose.Schema({
   text: { type: String, required: true },
   ans_by: { type: String, required: true },
-  ans_date_time :{ type: Date, default: Date.now }
+  authorid: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  ans_date_time :{ type: Date, default: Date.now },
+  votes: { type: Number, default: 0 }
 });
 
 answerSchema.virtual('ansBy').get(function() {

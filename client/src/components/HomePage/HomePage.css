@@ -22,10 +22,15 @@
     flex-direction: column;
     align-items: center;
     margin: 0;
+    height: 100%;
     padding: 0;
     width: 100% !important;
   }
-
+.questionListContainer{
+  height: 90vh; /* Adjust the height as needed */
+  width: 100%;
+  overflow-y: auto; /* This enables vertical scrolling */
+}
 #sortBtn {
     background: white;
 }
@@ -96,6 +101,45 @@
     border-top: 1px black dashed;
   }
   
+  @media (min-width: 1024px) {
+    .questionListContainer {
+      height: 600px; /* taller on larger screens */
+    }
+  }
+  
+  /* Medium screens */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .questionListContainer {
+      height: 500px; /* medium height for medium screens */
+    }
+  }
+  
+  /* Smaller screens */
+  @media (max-width: 767px) {
+    .questionListContainer {
+      height: 300px; /* shorter on small screens */
+    }
+  }
+  .summary{
+    color:grey;
+    font-size: small;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+  }
+  
+  .pagination button {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
   
 
 

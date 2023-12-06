@@ -4,11 +4,11 @@ body {
   margin: 0;
   font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
     "Lucida Sans", Arial, sans-serif;
-  height: 100% !important;
+  height: 100vh !important;
 }
 #main {
   display: flex;
-  height: 100vh !important;
+  height: 100vh;
 }  
 #mainBody,#tagPage {
   display: flex;
@@ -39,25 +39,7 @@ body {
 
 
 
-#answerList{
- display: flex;
- width: 100%;
- flex-direction: column;
- justify-content: space-evenly;
-  overflow: scroll;
-  overflow-y: auto;
-  border-bottom: 1px black dashed;
-}
 
-.answerCard {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  width: 100% !important;
-  padding-top: 20px;
-  padding-bottom: 10px;
-  border-top: 1px black dashed;
-}
 
 
 
@@ -88,18 +70,25 @@ body {
   align-items: flex-start;
   justify-content: space-evenly;
   flex-direction: row;
-  align-items: flex-start;
+
   width: 100%;
   margin-top: 30px;
   font-size: 20px;
   font-weight: 900;
 }
 
+.questionTextContainer{
+  display: flex;
+  align-items:center;
+  flex-direction: column;
+  max-width: 80%;
+}
+
 #questionText{
   font-weight:200;
   font-size: 16px;
   padding-right: 20px;
-  max-width: 70%;
+  max-width: 80%;
   align-items: stretch;
   
 }
@@ -124,13 +113,6 @@ body {
  padding: 20px;
 }
 
-.answerText {
-  font-size: 16px;
-  padding: 10px;
-  margin-bottom: 15px;
-  max-width: 75%;
-  color: #333;
-}
 
 .answerUserInfo {
   display: flex;
@@ -200,3 +182,14 @@ body {
   color: gray;
 
 }
+
+#root {
+  overflow:auto;
+  height: 100vh; /* Optional: You might want to limit the height to the viewport */
+  width: 100vw; /* Optional: You might want to limit the width to the viewport */
+}
+
+
+
+
+

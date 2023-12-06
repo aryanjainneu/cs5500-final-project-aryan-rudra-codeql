@@ -2,6 +2,9 @@
 const Question = require('./questions');
 const Answer = require('./answers');
 const Tag = require('./tags');
+const User = require('./user');
+const Comment = require('./comment');
+const bcrypt = require('bcrypt');
 
 class ApplicationModel {
   static instance = null;
@@ -13,10 +16,18 @@ class ApplicationModel {
     ApplicationModel.instance = this;
   }
 
-  static async getQuestions() {
-    const questions = await Question.find({});
-    return questions.map(question => question.toObject({ virtuals: true }));
-  }
+  static async getQuestions(page, limit) {
+    const skip = (page - 1) * limit;
+    const questions = await Question.find({}).skip(skip).limit(limit);
+    const total = await Question.countDocuments();
+
+    return {
+        total,
+        page,
+        pageSize: questions.length,
+        data: questions.map(question => question.toObject({ virtuals: true })),
+    };
+}
   static async getAnswers() {
     const answers = await Answer.find({});
     return answers.map(answer => answer.toObject({ virtuals: true }));
@@ -33,6 +44,16 @@ class ApplicationModel {
       asked_by: askedBy, 
       ask_date_time: askDate 
     });
+  }
+
+  static async addUser(username, email, password) {
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return await User.create({
+      username,
+      password: hashedPassword,
+      email,
+    })
   }
 
   static async addNewTags(tagInput) {
@@ -72,26 +93,64 @@ class ApplicationModel {
     return question ? question.toObject({ virtuals: true }) : null;
   }
 
-  static async getAnswersForQuestion(qid) {
+  // static async getAnswersForQuestion(qid,page,limit) {
+  //   try {
+  //     const question = await Question.findById(qid)
+  //                                     .populate({
+  //                                         path: 'answers', 
+  //                                         options: { sort: { 'ans_date_time': -1 } }
+  //                                     })
+  //                                     .exec();
+  
+  //     if (!question) {
+  //       return [];
+  //     }
+  //     const answers = question.answers.map(answer => answer.toObject({ virtuals: true }));
+  
+  //     return answers;
+  //   } catch (error) {
+  //     console.error("Error in getAnswersForQuestion:", error);
+  //     throw error;
+  //   }
+  // }
+
+  static async getAnswersForQuestion(qid, page, limit) {
     try {
-      const question = await Question.findById(qid)
-                                      .populate({
-                                          path: 'answers', 
-                                          options: { sort: { 'ans_date_time': -1 } }
-                                      })
-                                      .exec();
-  
-      if (!question) {
-        return [];
-      }
-      const answers = question.answers.map(answer => answer.toObject({ virtuals: true }));
-  
-      return answers;
+        // Find the question without populating answers to get the total count
+        const questionForCount = await Question.findById(qid).exec();
+
+        if (!questionForCount || !questionForCount.answers) {
+            return { answers: [], totalAnswers: 0 };
+        }
+
+        const total = questionForCount.answers.length;
+
+        
+        const questionWithPaginatedAnswers = await Question.findById(qid)
+                                                           .populate({
+                                                               path: 'answers',
+                                                               options: { 
+                                                                   sort: { 'ans_date_time': -1 },
+                                                                   limit: limit,
+                                                                   skip: limit * (page - 1)
+                                                               }
+                                                           })
+                                                           .exec();
+
+        if (!questionWithPaginatedAnswers) {
+            return { answers: [], total: 0 };
+        }
+
+       
+        const answers = questionWithPaginatedAnswers.answers.map(answer => answer.toObject({ virtuals: true }));
+
+        return { answers, total };
     } catch (error) {
-      console.error("Error in getAnswersForQuestion:", error);
-      throw error;
+        console.error("Error in getAnswersForQuestion:", error);
+        throw error;
     }
-  }
+}
+
 
 
   static async getQuestionsByTag(tid) {
@@ -100,18 +159,82 @@ class ApplicationModel {
     return await this.addTagToQuestion(questions) 
   }
 
-  static async getNewestQuestionsFirst() {
-    const questions = await Question.find({}).sort({ ask_date_time: -1 });
-    return questions.map(question => question.toObject({ virtuals: true }));
-  }
+  // static async getNewestQuestionsFirst() {
+  //   const questions = await Question.find({}).sort({ ask_date_time: -1 });
+  //   return questions.map(question => question.toObject({ virtuals: true }));
+  // }
 
-  static async getUnansweredQuestionsFirst() {
-    const questions = await Question.find({ answers: { $size: 0 } }).sort({ ask_date_time: -1 });
-    return questions.map(question => question.toObject({ virtuals: true }));
-  }
+  // static async getUnansweredQuestionsFirst() {
+  //   const questions = await Question.find({ answers: { $size: 0 } }).sort({ ask_date_time: -1 });
+  //   return questions.map(question => question.toObject({ virtuals: true }));
+  // }
 
-  static async getActiveQuestionsFirst() {
-    const mostActiveQuestions = await Question.aggregate([
+  // static async getActiveQuestionsFirst() {
+  //   const mostActiveQuestions = await Question.aggregate([
+  //     {
+  //       $lookup: {
+  //         from: 'answers', 
+  //         localField: 'answers',
+  //         foreignField: '_id',
+  //         as: 'fetchedAnswers'
+  //       }
+  //     },
+  //     {
+  //       $addFields: {
+  //         lastActivityDate: { $max: '$fetchedAnswers.ans_date_time' }
+  //       }
+  //     },
+  //     { $sort: { lastActivityDate: -1 } },
+  //     { $unset: 'fetchedAnswers' }
+  //   ]).exec();
+
+  //   return mostActiveQuestions.map(question => {
+  //     const questionDoc = new Question(question);
+  //     return questionDoc.toObject({ virtuals: true });
+  //   });
+  // }
+
+static async getNewestQuestionsFirst(page, limit) {
+  const totalCount = await Question.countDocuments();
+  const totalPages = Math.ceil(totalCount / limit);
+
+  // Validate page number
+  if (page < 1 || page > totalPages) {
+      throw new Error('Invalid page number');
+  }
+    const questions = await Question.find({})
+        .sort({ ask_date_time: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit);
+    return questions.map(question => question.toObject({ virtuals: true }));
+}
+
+static async getUnansweredQuestionsFirst(page, limit) {
+  const totalCount = await Question.countDocuments();
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Validate page number
+    if (page < 1 || page > totalPages) {
+        throw new Error('Invalid page number');
+    }
+  const questions = await Question.find({ answers: { $size: 0 } })
+      .sort({ ask_date_time: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+  return questions.map(question => question.toObject({ virtuals: true }));
+}
+
+
+
+static async getActiveQuestionsFirst(page, limit) {
+  const totalCount = await Question.countDocuments();
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Validate page number
+    if (page < 1 || page > totalPages) {
+        throw new Error('Invalid page number');
+    }
+      const mostActiveQuestions = await Question.aggregate([
       {
         $lookup: {
           from: 'answers', 
@@ -127,15 +250,15 @@ class ApplicationModel {
       },
       { $sort: { lastActivityDate: -1 } },
       { $unset: 'fetchedAnswers' }
-    ]).exec();
+    ]).skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
 
-    return mostActiveQuestions.map(question => {
-      const questionDoc = new Question(question);
-      return questionDoc.toObject({ virtuals: true });
-    });
-  }
-
-  
+  return mostActiveQuestions.map(question => {
+    const questionDoc = new Question(question);
+    return questionDoc.toObject({ virtuals: true });
+  });
+}
   
 
   static async incrementViewCount(questionId) {
@@ -146,27 +269,31 @@ class ApplicationModel {
     }
   }
 
-  static async getQuestionsWithTags(order,questions) {
+  static async getQuestionsWithTags(order, questions, page = 1, limit = 5) {
 
-    if(!questions){
+    if (!questions) {
       switch (order) {
         case 'newest':
-          questions = await this.getNewestQuestionsFirst();
+          questions = await this.getNewestQuestionsFirst(page, limit);
           break;
         case 'unanswered':
-          questions = await this.getUnansweredQuestionsFirst();
+          questions = await this.getUnansweredQuestionsFirst(page, limit);
           break;
         case 'active':
-          questions = await this.getActiveQuestionsFirst();
+          questions = await this.getActiveQuestionsFirst(page, limit);
           break;
         default:
           throw new Error('Invalid order specified');
       }
     }
    
-
+    const total = await Question.countDocuments();
     const results = await this.addTagToQuestion(questions);
-    return results;
+    return {
+      questions: results,
+      total
+    };
+
   }
 
   static async addTagToQuestion(questions) {
@@ -253,6 +380,79 @@ class ApplicationModel {
   static async getTagsByIds(tagIds) {
     return await Tag.find({ _id: { $in: tagIds } });
   }
+
+
+  static async getCommentsByQuestionId(qid, page, limit) {
+    try {
+        const skip = (page - 1) * limit;
+        const questionForCount = await Question.findById(qid).exec();
+        // Populate comments directly in the query
+        const question = await Question.findById(qid)
+                                       .populate({
+                                           path: 'comments',
+                                           model: Comment, // Ensure this is the correct model name
+                                           options: {
+                                               sort: { 'dateOfComment': -1 }, // Sort by date in descending order
+                                               skip,
+                                               limit
+                                           }
+                                       })
+                                       .exec();
+
+        if (!question) {
+            throw new Error('Question not found');
+        }
+
+        const totalComments = questionForCount.comments.length;
+
+        // Return the comments and total comment count
+        return {
+            comments: question.comments,
+            total: totalComments
+        };
+    } catch (error) {
+        console.error('Error in getCommentsByQuestionId:', error);
+        throw error;
+    }
+}
+
+
+static async getCommentsByAnsId(ansId, page, limit) {
+  try {
+      const skip = (page - 1) * limit;
+      const answerForCount = await Answer.findById(ansId).exec();
+      // Populate comments directly in the query
+      const answer = await Answer.findById(ansId)
+                                     .populate({
+                                         path: 'comments',
+                                         model: Comment, // Ensure this is the correct model name
+                                         options: {
+                                             sort: { 'dateOfComment': -1 }, // Sort by date in descending order
+                                             skip,
+                                             limit
+                                         }
+                                     })
+                                     .exec();
+
+      if (!answer) {
+          throw new Error('Answer not found');
+      }
+
+      const totalComments = answerForCount.comments.length;
+
+      // Return the comments and total comment count
+      return {
+          comments: answer.comments,
+          total: totalComments
+      };
+  } catch (error) {
+      console.error('Error in getCommentsByQuestionId:', error);
+      throw error;
+  }
+}
+
+
+
 }
 
 module.exports = ApplicationModel;

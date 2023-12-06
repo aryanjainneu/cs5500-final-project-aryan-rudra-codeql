@@ -1,0 +1,37 @@
+.comment {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 100%;
+
+    border-radius: 4px;
+}
+
+.commentVotes {
+    margin-right: 10px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 250;
+}
+
+.upvoteButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    font-size: 1em;
+}
+
+.commentText {
+   
+    font-size: 12px;
+    margin-right: 10px;
+    font-style: normal;
+    font-weight: 250;
+}
+

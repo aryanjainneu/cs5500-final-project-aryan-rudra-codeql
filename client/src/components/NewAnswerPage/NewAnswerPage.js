@@ -5,7 +5,7 @@ import ApplicationModel from '../../models/ApplicationModel';
 import { useState } from 'react';
 import { containsValidHyperLink,containsHyperLinkPattern} from '../../Utility/utility';
 const appModel = new ApplicationModel();
-const NewAnswerPage = ({qid,setCurrentPage,setQuestions}) => {
+const NewAnswerPage = ({qid,setCurrentPage/*,setQuestions*/}) => {
     // const {qid} = useParams();
     // const navigate = useNavigate();
     const [errors, setErrors] = useState({  text: '', username: '' });
@@ -18,8 +18,8 @@ const NewAnswerPage = ({qid,setCurrentPage,setQuestions}) => {
     if(!formInputValidation(username,text)){
       try {
         await appModel.addAnswer(text, username, qid, new Date());
-        const updatedQuestions = await appModel.getQuestionsWithTags('newest');
-        setQuestions(updatedQuestions);
+        // const updatedQuestions = await appModel.getQuestionsWithTags('newest');
+        // setQuestions(updatedQuestions);
         setCurrentPage('questionDetail');
       } catch (error) {
         console.error('Error submitting answer:', error);

@@ -27,11 +27,14 @@ module.exports = {
     "plugins": [
         "react"
     ],
-    settings: {
-        react: {
-          version: 'detect', // React version. "detect" automatically picks the version from your project.
-        },
+    "settings": {
+        "react": {
+          "version": 'detect',
       },
-    "rules": {
+    },
+      "rules": {
+        "react/react-in-jsx-scope": "off",
+        "no-extra-semi": "off",
+        "react/prop-types": "off",
     }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import './HomePage.css'
 
-const MainBodySecHeader = ({ numberOfQuestions,filterQuestion }) => {
+const MainBodySecHeader = ({ numberOfQuestions,filterQuestion}) => {
 
   const handleFilterClick = (e) => {
     const filter = e.target.value;

@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from 'react';
 // import { BrowserRouter as Router } from 'react-router-dom';
 import Header from './components/header/Header';
-
+// import RoutesComponent from './RouterComponent.js'
 import SideBarNav from './components/sidenav/SideBarNav';
 import ApplicationModel from './models/ApplicationModel';
 import HomePage from './components/HomePage/HomePage'
@@ -11,6 +11,7 @@ import TagPage from './components/TagPage/TagPage';
 import AskQuestionForm from'./components/NewQuestionPage/AskQuestionForm'
 // import SearchPage from './components/HomePage/SearchPage'
 import TaggedQuestionPage from './components/TagPage/TaggedQuestionPage'
+import WelcomePage from './Welcome';
 
 
 
@@ -19,11 +20,16 @@ const appModel = new ApplicationModel();
 const App = () => {
   const headerText = "Fake Stack Overflow";
   const [questions, setQuestions] = useState([]);
-  // const [searchResult, setSearchResult] = useState([]);
+  const [user, setUser] = useState(null);
+  const [activeView, setActiveView] = useState('options');
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalQuestionCount,setTotalQuestionCount] = useState(0);
+  //const [searchResult, setSearchResult] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState('all-questions');
+  const [currentPage, setCurrentPage] = useState('welcome');
   const [currentQID, setCurrentQID] = useState(null);
   const [currentTID, setCurrentTID] = useState(null);
+
 
 
   const addNewQuestion = async (title, text, tagInputs, askedBy, askDate ) => {
@@ -37,11 +43,23 @@ const App = () => {
   };
 
   const handlePostAnswerClick = (qid) => {
-    setCurrentQID(qid);
-    setCurrentPage('new-answer');
+    if(user){
+      setCurrentQID(qid);
+      setCurrentPage('new-answer');
+    }else{
+      setActiveView('login');
+      setCurrentPage('welcome');
+    }
+ 
   }
   const handleAskQuestionClick = () => {
-    setCurrentPage('ask-question');
+    if(user){
+      setCurrentPage('ask-question');
+    }else{
+      setActiveView('login');
+      setCurrentPage('welcome');
+    }
+    
   };
 
   const incrementViewCount = async (qid) => {
@@ -68,7 +86,7 @@ const App = () => {
           const updatedQuestions = await appModel.getQuestionsWithTags('newest');
           setQuestions(updatedQuestions);
         }
-        setCurrentPage('all-questions');
+        // setCurrentPage('all-questions');
         
       }catch(error){
         console.log("search failed :",error);
@@ -81,8 +99,10 @@ const App = () => {
 
   const filterQuestion = async (filter) => {
     try{
-      const filteredQuestion  = await  appModel.getQuestionsWithTags(filter.toLowerCase())
-      setQuestions(filteredQuestion);
+      const data  = await  appModel.getQuestionsWithTags(filter.toLowerCase())
+      setTotalPages(data.totalQuestionCount);
+      setQuestions(data.questions);
+      setTotalPages(data.totalPages);
     }catch(error){
       console.error('Could not Filter Question:', error);
     }
@@ -91,16 +111,25 @@ const App = () => {
 
  const handleQuestionNavClick=async ()=>{
   try{
-    const allQuestions  = await  appModel.getQuestionsWithTags('newest');
+    const data  = await  appModel.getQuestionsWithTags('newest');
     setCurrentPage('all-questions')
-    setQuestions(allQuestions);
+    setTotalPages(data.totalQuestionCount);
+    setQuestions(data.questions);
+    setTotalPages(data.totalPages);
+    
     setSearchTerm("");
   }catch(error){
     console.error('Could not load all Questions:', error);
   }
   
+  
 
  }
+
+
+
+
+
  const handleTagCardClick=(tid)=>{
   setCurrentTID(tid);
   setCurrentPage('tagged-question');
@@ -110,7 +139,9 @@ const App = () => {
     const fetchQuestions = async () => {
       try {
         const data = await appModel.getQuestionsWithTags("newest");
-        setQuestions(data);
+        setTotalPages(data.totalQuestionCount);
+        setQuestions(data.questions);
+        setTotalPages(data.totalPages);
       } catch (error) {
         console.error('Failed to fetch questions:', error);
       }
@@ -122,29 +153,65 @@ const App = () => {
   return (
   
       <div>
+        {currentPage === 'welcome' ? (
+          <WelcomePage
+            setUser={setUser}
+            user={user}
+            setCurrentPage={setCurrentPage}
+            setActiveView={setActiveView}
+            activeView={activeView}
+          />
+        ) :(
+          <>
       <Header headerText={headerText} onSearch={handleSearch} setCurrentPage={setCurrentPage}/>
         <div id="main" className="main">
-          <SideBarNav currentPage={currentPage} setCurrentPage ={setCurrentPage} handleQuestionNavClick={handleQuestionNavClick} />
+        
+          <SideBarNav 
+          currentPage={currentPage} 
+          setCurrentPage = {setCurrentPage} 
+          handleQuestionNavClick={handleQuestionNavClick}
+          user = {user} 
+          setUser ={setUser}
+          setActiveView={setActiveView}
+           />
+
+
           <div id = 'mainBody'>
-          <div id='mainBody'>
           {currentPage === 'all-questions' && 
           <HomePage 
-          questions={questions} 
+          questions={questions}
+          setQuestions={setQuestions} 
           filterQuestion={filterQuestion} 
           incrementViewCount={incrementViewCount} 
           handleAskQuestionClick ={handleAskQuestionClick} 
           setCurrentPage={setCurrentPage} 
           searchTerm={searchTerm}
-          setCurrentQID={setCurrentQID}/>}
+          setCurrentQID={setCurrentQID}
+          user = {user}
+          setUser = {setUser}
+          totalPages = {totalPages}
+          setTotalPages={setTotalPages}
+          totalQuestionCount = {totalQuestionCount}
+          setTotalQuestionCount = {setTotalQuestionCount}
+          />}
+
+
           {currentPage === 'ask-question' && 
           <AskQuestionForm 
           addNewQuestion={addNewQuestion} 
           setCurrentPage={setCurrentPage} />}
+
+
           {currentPage === 'questionDetail' && 
           <QuestionDetailPage 
           qid={currentQID} 
           handlePostAnswerClick={handlePostAnswerClick} 
-          handleAskQuestionClick = {handleAskQuestionClick}/>}
+          handleAskQuestionClick = {handleAskQuestionClick}
+          user = {user}
+          setUser = {setUser}
+          />}
+
+
           {/* {currentPage === 'searchResults' && 
           <SearchPage 
           questions={searchResult} 
@@ -158,22 +225,33 @@ const App = () => {
           <NewAnswerPage 
           qid={currentQID} 
           setCurrentPage={setCurrentPage}
-          setQuestions={setQuestions}/>}
+          />}
+
+
           {currentPage === 'tagPage' && 
           <TagPage
           handleTagCardClick={handleTagCardClick}
-          handleAskQuestionClick = {handleAskQuestionClick}/>}
+          handleAskQuestionClick = {handleAskQuestionClick}
+          user = {user}
+          setUser = {setUser}
+          />}
+
+
           {currentPage === 'tagged-question' && 
           <TaggedQuestionPage 
           incrementViewCount={incrementViewCount} 
           tid ={currentTID}
           setCurrentPage={setCurrentPage} 
-          setCurrentQID={setCurrentQID}/>}
+          setCurrentQID={setCurrentQID}
+          />}
         </div>
-
-          </div>
-        </div>
+    
+        
       </div>
+      </>
+        )}
+      </div>
+     
    
   
 //   <Router>
@@ -185,8 +263,12 @@ const App = () => {
 //       <RoutesComponent 
 //         questions={questions} 
 //         filterQuestion={filterQuestion}
+//         setUser={setUser}
+//         setSessionID ={setSessionID}
+//         user = {user}
+//         sessionID = {sessionID}
 //         addNewQuestion={addNewQuestion}
-//         searchResult={searchResult}
+//         searchResult={questions}
 //         searchTerm={searchTerm}
 //         incrementViewCount={incrementViewCount}
 //       />

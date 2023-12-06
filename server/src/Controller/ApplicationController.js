@@ -1,4 +1,5 @@
 const ApplicationModel = require('../../models/ApplicationModel');
+const User = require('../../models/user');
 
 class ApplicationController {
   static async getQuestions(req, res) {
@@ -16,6 +17,26 @@ class ApplicationController {
       res.status(201).json(question);
     } catch (error) {
       res.status(500).send(error.message);
+    }
+  }
+
+  static async addUser(req, res) {
+    try {
+      const { username, email, password } = req.body;
+
+      await ApplicationModel.addUser(username, email, password);
+
+      res.status(201).json({ message: 'User registered successfully'});
+    } catch (error) {
+      console.error('Registration error:', error);
+
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyPattern)[0];
+        let message = `An account with that ${field} already exists.`;
+        return res.status(409).json({ message }); // 409 Conflict
+      }
+
+      res.status(500).json({ message: 'Error registering new user' });
     }
   }
 
@@ -46,8 +67,14 @@ class ApplicationController {
 
   static async getAnswersForQuestion(req, res) {
     try {
-      const answers = await ApplicationModel.getAnswersForQuestion(req.params.qid);
-      res.json(answers);
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const {answers,total} = await ApplicationModel.getAnswersForQuestion(req.params.qid,page,limit);
+      res.json({answers,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -61,6 +88,26 @@ class ApplicationController {
       res.status(500).send(error.message);
     }
   }
+
+  static async getQuestionWithTags(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const order = req.params.order; 
+
+      const { questions, total } = await ApplicationModel.getQuestionsWithTags(order,null, page, limit);
+
+      res.json({
+        questions,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
 
   static async getNewestQuestionsFirst(req, res) {
     try {
@@ -89,14 +136,14 @@ class ApplicationController {
     }
   }
 
-  static async getQuestionWithTags(req, res) {
-    try {
-      const questionWithTags = await ApplicationModel.getQuestionsWithTags(req.params.order);
-      res.json(questionWithTags);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
+  // static async getQuestionWithTags(req, res) {
+  //   try {
+  //     const questionWithTags = await ApplicationModel.getQuestionsWithTags(req.params.order);
+  //     res.json(questionWithTags);
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // }
 
   static async incrementViewCount(req, res) {
     try {
@@ -137,9 +184,86 @@ class ApplicationController {
 
   static async getTagsByIds(req, res) {
     try {
-      // Assuming tag IDs are passed in the body of the request. Adjust as needed for your API design.
       const tags = await ApplicationModel.getTagsByIds(req.body.tagIds);
       res.json(tags);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+  static async login(req, res) {
+    try {
+      const { username, password } = req.body;
+      const user = await User.loginUser(username, password);
+
+      req.session.userId = user._id; 
+      res.json({user});
+    } catch (error) {
+      console.error('Login error:', error.message);
+      res.status(401).json({ message: error.message || 'An error occurred while attempting to log in' });
+    }
+  }
+
+  static async logout(req, res) {
+    try {
+     
+      if (req.session) {
+        req.session.destroy(err => {
+          if (err) {
+        
+            console.error('Logout error:', err);
+            res.status(500).json({ message: 'Error occurred during logout' });
+          } else {
+    
+            res.clearCookie('connect.sid'); 
+            res.json({ message: 'Successfully logged out' });
+          }
+        });
+      } else {
+     
+        res.json({ message: 'No active session' });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ message: 'An error occurred while attempting to log out' });
+    }
+  }
+
+
+
+
+  static async getCommentsByQid(req, res) {
+    try {
+      const qid = req.query.qid;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const { comments, total } = await ApplicationModel.getCommentsByQuestionId(qid, page, limit);
+
+      res.json({
+        comments,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+
+  static async getCommentsByAnsId(req, res) {
+    try {
+      const aid = req.query.aid;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const { comments, total } = await ApplicationModel.getCommentsByAnsId(aid, page, limit);
+
+      res.json({
+        comments,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
     } catch (error) {
       res.status(500).send(error.message);
     }

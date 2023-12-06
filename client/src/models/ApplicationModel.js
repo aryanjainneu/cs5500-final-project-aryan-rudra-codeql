@@ -1,4 +1,8 @@
 import axios from 'axios';
+
+const serverAPI = axios.create({
+  baseURL: 'http://localhost:8000/api', 
+});
 class ApplicationModel {
   constructor() {
     this.api = axios.create({
@@ -41,20 +45,35 @@ class ApplicationModel {
     return response.data;
   }
 
-  async getAnswersForQuestion(qid) {
-    const response = await this.api.get(`/questions/${qid}/answers`);
-    const answers = response.data.map(answer => {
-      const ansDateConverted = new Date(answer.ansDate);
-      if (isNaN(ansDateConverted.getTime())) {
-        throw new Error(`Invalid date string received: ${answer.ansDate}`);
-      }
+  async getAnswersForQuestion(qid,page =1,limit =5) {
+    //const response = await this.api.get(`/questions/${qid}/answers`);
+    try{
+      const response = await this.api.get(`/questions/${qid}/answers`, {
+        params: { page, limit }
+      });
+      const answers = response.data.answers.map(answer => {
+        const ansDateConverted = new Date(answer.ansDate);
+        if (isNaN(ansDateConverted.getTime())) {
+          throw new Error(`Invalid date string received: ${answer.ansDate}`);
+        }
+        return {
+          ...answer,
+          ansDate: ansDateConverted
+        };
+      });
+  
       return {
-        ...answer,
-        ansDate: ansDateConverted
-      };
-    });
-
-    return answers;
+        answers:answers,
+        total:response.data.total,
+        page:response.data.page,
+        totalPages:response.data.totalPages
+      }
+    }catch(error){
+      console.error('Error fetching questions with tags:', error);
+      throw error;
+    }
+  
+    
   }
 
   async getQuestionsByTag(tid) {
@@ -94,17 +113,135 @@ class ApplicationModel {
     return response.data;
   }
 
-  async getQuestionsWithTags(filter) {
-    try {
-      const response = await this.api.get(`/questions/questionwithtags/${filter}`);
-      const questionsWithDates = this.convertDateStringToDate(response);
+  // async getQuestionsWithTags(filter) {
+  //   try {
+  //     const response = await this.api.get(`/questions/questionwithtags/${filter}`);
+  //     const questionsWithDates = this.convertDateStringToDate(response);
   
-      return questionsWithDates;
+  //     return questionsWithDates;
+  //   } catch (error) {
+  //     console.error('Error fetching questions with tags:', error);
+  //     throw error;
+  //   }
+  // }
+
+
+  async getQuestionsWithTags(filter, page=1, limit=5) {
+    try {
+      const response = await this.api.get(`/questions/questionwithtags/${filter}`, {
+        params: { page, limit }
+      });
+      const questionsWithDates = this.convertQuestionDateStringToDate(response.data.questions);
+    
+      // Include the total number of questions and any other metadata returned by the API
+      return {
+        questions: questionsWithDates,
+        total: response.data.total,
+        page:response.data.page,
+        totalPages:response.data.totalPages
+      };
     } catch (error) {
       console.error('Error fetching questions with tags:', error);
       throw error;
     }
   }
+
+  async getCommentsForQuestion(qid, page=1, limit=5) {
+    try {
+      const response = await this.api.get(`/question/comments`, {
+        params: { qid, page, limit, }
+      });
+      const commentsWithDates = response.data.comments.map(item => {
+        const askDateConverted = new Date(item.dateOfComment);
+        if (isNaN(askDateConverted.getTime())) {
+          throw new Error(`Invalid date string received: ${item.question.askDate}`);
+        }
+        return {
+          ...item,
+          dateOfComment : askDateConverted
+        };
+      });
+    
+      // Include the total number of questions and any other metadata returned by the API
+      return {
+        comments: commentsWithDates,
+        total: response.data.total,
+        page:response.data.page,
+        totalPages:response.data.totalPages
+      };
+    } catch (error) {
+      console.error('Error fetching questions with tags:', error);
+      throw error;
+    }
+  }
+
+  async getCommentsForAnswer(aid, page=1, limit=5) {
+    try {
+      const response = await this.api.get(`/answer/comments`, {
+        params: { aid, page, limit, }
+      });
+      const commentsWithDates = response.data.comments.map(item => {
+        const askDateConverted = new Date(item.dateOfComment);
+        if (isNaN(askDateConverted.getTime())) {
+          throw new Error(`Invalid date string received: ${item.question.askDate}`);
+        }
+        return {
+          ...item,
+          dateOfComment : askDateConverted
+        };
+      });
+    
+      // Include the total number of questions and any other metadata returned by the API
+      return {
+        comments: commentsWithDates,
+        total: response.data.total,
+        page:response.data.page,
+        totalPages:response.data.totalPages
+      };
+    } catch (error) {
+      console.error('Error fetching questions with tags:', error);
+      throw error;
+    }
+  }
+
+  convertCommentDateStringToDate(comments){
+    const questionsWithDates = comments.map(item => {
+      const askDateConverted = new Date(item.question.askDate);
+      if (isNaN(askDateConverted.getTime())) {
+        throw new Error(`Invalid date string received: ${item.question.askDate}`);
+      }
+      return {
+        ...item,
+        question: {
+          ...item.question,
+          askDate: askDateConverted,
+        },
+      };
+    });
+    return questionsWithDates;
+  }
+
+
+
+
+  convertQuestionDateStringToDate(questions){
+    const questionsWithDates = questions.map(item => {
+      const askDateConverted = new Date(item.question.askDate);
+      if (isNaN(askDateConverted.getTime())) {
+        throw new Error(`Invalid date string received: ${item.question.askDate}`);
+      }
+      return {
+        ...item,
+        question: {
+          ...item.question,
+          askDate: askDateConverted,
+        },
+      };
+    });
+    return questionsWithDates;
+  }
+
+  
 
   convertDateStringToDate(response){
     const questionsWithDates = response.data.map(item => {
@@ -128,6 +265,35 @@ class ApplicationModel {
     const response = await this.api.post('/tags/ids', { tagIds });
     return response.data;
   }
+
+  static async registerUser(username, email, password) {
+    try {
+      const response = await serverAPI.post('/register', { username, email, password });
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error('Registration failed:', error.response.data);
+      return { success: false, error: error.response.data.message || 'Registration failed' };
+    }
+  }
+
+  static async login(username,password){
+    try {
+      const response = await serverAPI.post('/login', {username,password});
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, error: error.response.data.message || 'login failed' };
+    }
+  }
+
+  static async logout(){
+    try {
+      const response = await serverAPI.post('/logout', { withCredentials: true } );
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, error: error.response.data.message || 'logout failed' };
+    }
+  }
+
 }
 
 export default ApplicationModel;

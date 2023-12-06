@@ -6,9 +6,12 @@ const questionSchema = new mongoose.Schema({
   text: { type: String, required: true },
   tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tag' }],
   answers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Answer' }],
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   asked_by: { type: String, required: true },
+  authorid: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   ask_date_time: { type: Date, default: Date.now },
-  views: { type: Number, default: 0 }
+  views: { type: Number, default: 0 },
+  votes: { type: Number, default: 0 }
 });
 
 questionSchema.virtual('tagIds').get(function() {

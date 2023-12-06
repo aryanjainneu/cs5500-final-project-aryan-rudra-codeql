@@ -1,0 +1,119 @@
+/* Style for the main comments section container */
+.commentsSection {
+ 
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    width: 100%;
+
+}
+.commentList{
+    height: 50%; /* Set a max-height for scrollable area */
+    overflow-y: auto; /* Makes the comment list scrollable */
+    border: 1px solid rgb(205, 203, 203);
+}
+
+/* Style for the loading message */
+.loadingComments {
+    text-align: center;
+    color: #555;
+    font-size: 1em;
+    margin-top: 20px;
+}
+
+/* Style for the section where users can post a new comment */
+.postCommentSection {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Style for the textarea where users write their new comment */
+.postCommentSection input {
+    width:100%;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical; /* Allows vertical resizing */
+}
+
+/* Style for the button used to post a new comment */
+.postCommentSection button {
+    background-color: #4CAF50; /* Green background */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    margin: 10px;
+}
+
+.postCommentSection button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-items: center;
+    justify-content: space-between;
+    padding: 10px;
+  }
+  
+  .pagination button {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+/* 
+.vote-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+   
+    
+  }
+  
+  .vote-arrow {
+    background-color: rgb(197, 192, 192);
+    border: 1px solid grey;
+    cursor: pointer;
+    box-shadow: 0 2px black;
+    color:black;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  
+  .vote-arrow:hover {
+    color: #000;
+  }
+  
+  .vote-arrow:not(:disabled):hover  {
+    background-color: #0056b3;
+    box-shadow: 0 2px #003d75; 
+    transform: translateY(1px); 
+  
+  .vote-arrow:active {
+    box-shadow: 0 1px #003d75;
+    transform: translateY(2px); 
+  }
+
+  .vote-arrow:disabled {
+    color: #9d9a9a;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+
+   */
