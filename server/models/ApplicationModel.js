@@ -453,6 +453,56 @@ static async getCommentsByAnsId(ansId, page, limit) {
 
 
 
+
+static async postCommentForAnsId(text,author,authorid,ansId) {
+
+  try {
+    // Create a new Comment document
+    const newComment = new Comment({ text, author, authorid });
+    await newComment.save();
+
+    // Find the corresponding Answer and update its comments array
+    const answer = await Answer.findById(ansId);
+    if (!answer) {
+        throw new Error('Answer not found');
+    }
+
+    answer.comments.push(newComment._id);
+    await answer.save();
+
+    return newComment; // Or return some other appropriate response
+} catch (error) {
+    console.error('Error in createCommentAndUpdateAnswer:', error);
+    throw error;
+}
+}
+
+static async postCommentForQid(text,author,authorid,qid) {
+
+  try {
+    // Create a new Comment document
+    const newComment = new Comment({ text, author, authorid });
+    await newComment.save();
+
+    // Find the corresponding Question and update its comments array
+    const question = await Question.findById(qid);
+    if (!question) {
+        throw new Error('Question not found');
+    }
+
+    question.comments.push(newComment._id);
+    await question.save();
+
+    return newComment; // Or return some other appropriate response
+} catch (error) {
+    console.error('Error in createCommentAndUpdateQuestion:', error);
+    throw error;
+}
+ 
+}
+
+
+
 }
 
 module.exports = ApplicationModel;

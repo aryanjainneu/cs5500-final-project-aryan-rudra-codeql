@@ -1,36 +1,32 @@
-#answerList{
-    display: flex;
-    width: 100%;
-    flex-direction: column;
-    justify-content: space-evenly;
-     overflow: scroll;
-     overflow-y: auto;
-     border-bottom: 1px black dashed;
-   }
-   
-   .answerCard {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-     height: 50%;
-     width: 100% !important;
-     padding-top: 20px;
-     padding-bottom: 10px;
-     border-top: 1px black dashed;
-   }
+#answerList {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: space-evenly;
+  overflow: scroll;
+  overflow-y: auto;
 
-   .answerText {
-    font-size: 16px;
-    padding: 10px;
-    margin-bottom: 15px;
-    max-width: 75%;
-    color: #333;
-  }
-
-.answerCardContainer{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
 
-  
+.answerCard {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 50%;
+  width: 100% !important;
+  box-shadow: 0 -5px 5px -5px rgba(0, 0, 0, 0.25);
+}
+
+.answerText {
+  font-size: 16px;
+  padding: 10px;
+  margin-bottom: 15px;
+  max-width: 75%;
+  color: #333;
+}
+
+.answerCardContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}

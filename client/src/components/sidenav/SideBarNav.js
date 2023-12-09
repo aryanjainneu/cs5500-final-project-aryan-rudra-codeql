@@ -3,14 +3,14 @@ import './SideNavBar.css';
 import ApplicationModel from '../../models/ApplicationModel';
 // import { useLocation, useNavigate } from 'react-router-dom';
 
-
+const appModel = new ApplicationModel();
 const SideBarNav = ({currentPage,setCurrentPage,handleQuestionNavClick,user,setUser,setActiveView}) => {
 
   const [logoutError ,setLogoutError] = useState('');
   const handleLogoutBtnClick=async (e)=>{
     e.preventDefault();
       if(user){
-        const result = await ApplicationModel.logout();
+        const result = await appModel.logout();
         if (result.success) {
           setLogoutError('');
           setUser(null);

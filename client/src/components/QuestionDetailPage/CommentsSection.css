@@ -3,14 +3,15 @@
  
     margin-top: 20px;
     padding: 15px;
-    border-radius: 5px;
+   
     width: 100%;
 
 }
 .commentList{
     height: 50%; /* Set a max-height for scrollable area */
     overflow-y: auto; /* Makes the comment list scrollable */
-    border: 1px solid rgb(205, 203, 203);
+    border: 2px solid rgb(233, 229, 229);
+    border-radius: 5px;
 }
 
 /* Style for the loading message */
@@ -23,7 +24,7 @@
 
 /* Style for the section where users can post a new comment */
 .postCommentSection {
-    margin-top: 20px;
+    margin-top: 10px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -34,9 +35,8 @@
 /* Style for the textarea where users write their new comment */
 .postCommentSection input {
     width:100%;
-    padding: 10px;
-    margin: 10px;
-    border: 1px solid #ccc;
+    margin: 5px;
+    border: 2px solid rgb(233, 229, 229);
     border-radius: 4px;
     resize: vertical; /* Allows vertical resizing */
 }
@@ -45,12 +45,11 @@
 .postCommentSection button {
     background-color: #4CAF50; /* Green background */
     color: white;
-    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 15px;
-    margin: 10px;
+
 }
 
 .postCommentSection button:hover {
@@ -74,6 +73,19 @@
   .pagination button:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  .noComments{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+  .commentInputContainer{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 20px;
   }
 
 /* 

@@ -189,6 +189,13 @@ body {
   width: 100vw; /* Optional: You might want to limit the width to the viewport */
 }
 
+.error {
+  color: red;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+
 
 
 

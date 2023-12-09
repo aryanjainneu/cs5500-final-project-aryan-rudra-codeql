@@ -1,6 +1,8 @@
 import React,{useState} from 'react';
 import '../../stylesheets/welcome.css'; 
 import ApplicationModel from '../../models/ApplicationModel';
+
+const appModel = new ApplicationModel();
 const RegisterForm = ({ onLoginClick,onBackClick}) =>{
 
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
@@ -15,7 +17,7 @@ const RegisterForm = ({ onLoginClick,onBackClick}) =>{
       const handleSubmit = async (e) => {
         e.preventDefault();
         if (validateForm()) {
-          const result = await ApplicationModel.registerUser(formData.username, formData.email, formData.password);
+          const result = await appModel.registerUser(formData.username, formData.email, formData.password);
           if (result.success) {
             clearForm();
             onLoginClick();

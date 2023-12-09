@@ -196,7 +196,7 @@ class ApplicationController {
       const { username, password } = req.body;
       const user = await User.loginUser(username, password);
 
-      req.session.userId = user._id; 
+      req.session.userId = user._id;
       res.json({user});
     } catch (error) {
       console.error('Login error:', error.message);
@@ -268,6 +268,32 @@ class ApplicationController {
       res.status(500).send(error.message);
     }
   }
+  static async postCommentForAnsId(req, res) {
+    try {
+      const {author,text,ansId} = req.body;
+      const authorid = req.session.userId;
+      await ApplicationModel.postCommentForAnsId(text,author,authorid,ansId);
+      res.status(201).json({message:'comment created successfully'});
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+  static async postCommentForQid(req, res) {
+    try {
+      const {author,text,qid} = req.body;
+      const authorid = req.session.userId;
+      await ApplicationModel.postCommentForQid(text,author,authorid,qid);
+      res.status(201).json({message:'comment created successfully'});
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+
+
 }
+
+
 
 module.exports = ApplicationController;
