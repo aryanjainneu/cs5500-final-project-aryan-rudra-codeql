@@ -11,7 +11,6 @@ const PAGE_SIZE = 5;
 const HomePage = ({
   questions,
   setQuestions,
-  filterQuestion,
   searchTerm,
   incrementViewCount,
   handleAskQuestionClick,
@@ -19,19 +18,21 @@ const HomePage = ({
   setCurrentQID,
   user,
   setUser,
-  totalPages,
-  setTotalPages,
-  totalQuestionCount,
-  setTotalQuestionCount,
+
 }) => {
   
   const [currentPaginationPage, setCurrentPaginationPage] = useState(1);
   const [loadingError, setLoadingError] = useState("");
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalQuestionCount, setTotalQuestionCount] = useState(0);
+  const [currentFilter,setCurrentFilter] = useState('newest');
+
+
   const fetchQuestions = async (page) => {
     setLoadingError('');
     try {
       const data = await appModel.getQuestionsWithTags(
-        "newest",
+        currentFilter,
         page,
         PAGE_SIZE
       );
@@ -56,6 +57,19 @@ const HomePage = ({
     }
   };
 
+  const filterQuestion = async (filter) => {
+    try {
+      const data = await appModel.getQuestionsWithTags(filter.toLowerCase());
+      setTotalQuestionCount(data.totalQuestionCount);
+      setQuestions(data.questions);
+      setCurrentFilter(filter.toLowerCase());
+      setTotalPages(data.totalPages);
+      setCurrentPaginationPage(1);
+    } catch (error) {
+      console.error("Could not Filter Question:", error);
+    }
+  };
+
   useEffect(() => {
     fetchQuestions(currentPaginationPage);
   }, [currentPaginationPage]);
@@ -72,6 +86,7 @@ const HomePage = ({
       <MainBodySecHeader
         numberOfQuestions={totalQuestionCount}
         filterQuestion={filterQuestion}
+        currentFilter = {currentFilter}
       />
       <div className="questionListContainer">
         { loadingError ? (

@@ -10,7 +10,7 @@ const WelcomePage = ({
   setCurrentPage,
   activeView,
   setActiveView,
-  fetchQuestions,
+
 }) => {
   const showLoginView = () => {
     setActiveView("login");
@@ -48,7 +48,6 @@ const WelcomePage = ({
             onBackClick={onBackClick}
             setUser={setUser}
             setCurrentPage={setCurrentPage}
-            fetchQuestions ={fetchQuestions}
           />
         )}
         {activeView === "register" && (

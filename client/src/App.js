@@ -20,8 +20,7 @@ const App = () => {
   const [questions, setQuestions] = useState([]);
   const [user, setUser] = useState(null);
   const [activeView, setActiveView] = useState("options");
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalQuestionCount, setTotalQuestionCount] = useState(0);
+
   //const [searchResult, setSearchResult] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState("welcome");
@@ -91,25 +90,13 @@ const App = () => {
     return false;
   };
 
-  const filterQuestion = async (filter) => {
-    try {
-      const data = await appModel.getQuestionsWithTags(filter.toLowerCase());
-      setTotalPages(data.totalQuestionCount);
-      setQuestions(data.questions);
-      setTotalPages(data.totalPages);
-    } catch (error) {
-      console.error("Could not Filter Question:", error);
-    }
-  };
+  
 
   const handleQuestionNavClick = async () => {
     try {
       const data = await appModel.getQuestionsWithTags("newest");
       setCurrentPage("all-questions");
-      setTotalPages(data.totalQuestionCount);
       setQuestions(data.questions);
-      setTotalPages(data.totalPages);
-
       setSearchTerm("");
     } catch (error) {
       console.error("Could not load all Questions:", error);
@@ -121,22 +108,9 @@ const App = () => {
     setCurrentPage("tagged-question");
   };
 
-  const fetchQuestions = async () => {
-    try {
-      const data = await appModel.getQuestionsWithTags("newest");
-      setTotalPages(data.totalQuestionCount);
-      setQuestions(data.questions);
-      setTotalPages(data.totalPages);
-    } catch (error) {
-      console.error("Failed to fetch questions:", error);
-    }
-  };
 
-  // useEffect(() => {
-    
 
-  //   fetchQuestions();
-  // }, []);
+ 
 
   return (
     <div>
@@ -147,7 +121,6 @@ const App = () => {
           setCurrentPage={setCurrentPage}
           setActiveView={setActiveView}
           activeView={activeView}
-          fetchQuestions = {fetchQuestions}
         />
       ) : (
         <>
@@ -171,7 +144,6 @@ const App = () => {
                 <HomePage
                   questions={questions}
                   setQuestions={setQuestions}
-                  filterQuestion={filterQuestion}
                   incrementViewCount={incrementViewCount}
                   handleAskQuestionClick={handleAskQuestionClick}
                   setCurrentPage={setCurrentPage}
@@ -179,10 +151,7 @@ const App = () => {
                   setCurrentQID={setCurrentQID}
                   user={user}
                   setUser={setUser}
-                  totalPages={totalPages}
-                  setTotalPages={setTotalPages}
-                  totalQuestionCount={totalQuestionCount}
-                  setTotalQuestionCount={setTotalQuestionCount}
+              
                 />
               )}
 
@@ -203,15 +172,6 @@ const App = () => {
                 />
               )}
 
-              {/* {currentPage === 'searchResults' && 
-          <SearchPage 
-          questions={searchResult} 
-          filterQuestion={filterQuestion} 
-          searchTerm={searchTerm}
-          handleAskQuestionClick={handleAskQuestionClick}
-          incrementViewCount={incrementViewCount} 
-          setCurrentPage={setCurrentPage} 
-          setCurrentQID={setCurrentQID} />} */}
               {currentPage === "new-answer" && (
                 <NewAnswerPage
                   qid={currentQID}

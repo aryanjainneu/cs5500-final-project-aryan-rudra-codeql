@@ -3,7 +3,7 @@ import '../../stylesheets/welcome.css';
 import ApplicationModel from '../../models/ApplicationModel';
 const appModel = new ApplicationModel();
 //import questions from '../../../../server/models/questions';
-const LoginForm = ({ onRegisterClick,onBackClick,setUser,setCurrentPage,fetchQuestions })=>{
+const LoginForm = ({ onRegisterClick,onBackClick,setUser,setCurrentPage })=>{
 
     const [errors, setErrors] = useState({ username: '', email: '', password: '' });
     const [formData, setFormData] = useState({
@@ -20,7 +20,6 @@ const LoginForm = ({ onRegisterClick,onBackClick,setUser,setCurrentPage,fetchQue
             setUser(result.data.user)
             clearForm();
             setCurrentPage('all-questions');
-            fetchQuestions();
           } else {
             setRegError(result.error);
           }
