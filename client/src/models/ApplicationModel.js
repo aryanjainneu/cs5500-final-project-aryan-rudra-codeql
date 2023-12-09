@@ -179,11 +179,19 @@ class ApplicationModel {
     }
   }
 
-  async searchQuestions(query) {
+  async searchQuestions(query,order,page,limit) {
     try {
-      const response = await this.api.get("/search", { params: { q: query } });
-      const searchResult = this.convertDateStringToDate(response);
-      return searchResult;
+      const response = await this.api.get("/search", { params: { q: query,order,page,limit } });
+      const searchResult = this.convertQuestionDateStringToDate(
+        response.data.questions
+      );
+      
+      return {
+        questions: searchResult,
+        total: response.data.total,
+        page: response.data.page,
+        totalPages: response.data.totalPages,
+      };
     } catch (error) {
       console.error("Error fetching search results", error);
       throw error;

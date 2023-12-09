@@ -15,7 +15,7 @@ class ApplicationModel {
     ApplicationModel.instance = this;
   }
 
-  static async getQuestions(page, limit) {
+  static async getQuestions(page = 1, limit = 5) {
     const skip = (page - 1) * limit;
     const questions = await Question.find({}).skip(skip).limit(limit);
     const total = await Question.countDocuments();
@@ -41,7 +41,7 @@ class ApplicationModel {
     if (!user) {
       throw new Error("User not found");
     }
-    return await Question.create({
+    const question = await Question.create({
       title,
       text,
       tags: tagIds,
@@ -49,6 +49,10 @@ class ApplicationModel {
       authorid: authorId,
       ask_date_time: askDate,
     });
+    user.qid.push(question._id); // Add the new question's ID
+    await user.save();
+
+    return question;
   }
 
   static async addUser(username, email, password) {
@@ -73,6 +77,7 @@ class ApplicationModel {
           throw new Error("Insufficient reputation to create new tags");
         }
         tag = await Tag.create({ name: tagName });
+        user.tids.push(tag._id);
       }
       tagIds.push(tag._id);
     }
@@ -92,6 +97,9 @@ class ApplicationModel {
       qid: qid,
       ans_date_time: date,
     });
+
+    user.ansIds.push(answer._id);
+    await user.save();
     await Question.findByIdAndUpdate(qid, {
       $push: { answers: answer._id },
       $set: { lastActivity: date },
@@ -132,7 +140,7 @@ class ApplicationModel {
   //   }
   // }
 
-  static async getAnswersForQuestion(qid, page, limit) {
+  static async getAnswersForQuestion(qid, page = 1, limit = 5) {
     try {
       // Find the question without populating answers to get the total count
       const questionForCount = await Question.findById(qid).exec();
@@ -214,7 +222,7 @@ class ApplicationModel {
   //   });
   // }
 
-  static async getNewestQuestionsFirst(page, limit) {
+  static async getNewestQuestionsFirst(page = 1, limit = 5) {
     const totalCount = await Question.countDocuments();
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -229,7 +237,7 @@ class ApplicationModel {
     return questions.map((question) => question.toObject({ virtuals: true }));
   }
 
-  static async getUnansweredQuestionsFirst(page, limit) {
+  static async getUnansweredQuestionsFirst(page = 1, limit = 5) {
     const totalCount = await Question.countDocuments();
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -244,7 +252,7 @@ class ApplicationModel {
     return questions.map((question) => question.toObject({ virtuals: true }));
   }
 
-  static async getActiveQuestionsFirst(page, limit) {
+  static async getActiveQuestionsFirst(page = 1, limit = 5) {
     const totalCount = await Question.countDocuments();
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -311,7 +319,7 @@ class ApplicationModel {
     return results;
   }
 
-  static async searchQuestions(query) {
+  static async searchQuestions(query, order, page = 1, limit = 5) {
     const tagPattern = /\[([^\]]+)\]/g;
     let tagNames = [];
     let match;
@@ -335,12 +343,10 @@ class ApplicationModel {
     let searchConditions = [];
 
     if (tagNames.length) {
-      // Transform each tagName into a case-insensitive regular expression
       const regexTagNames = tagNames.map(
         (tagName) => new RegExp("^" + escapeRegExp(tagName) + "$", "i")
       );
 
-      // Query the Tag collection to get the tag IDs
       const tags = await Tag.find({ name: { $in: regexTagNames } }).lean();
       if (tags.length > 0) {
         searchConditions.push({ tags: { $in: tags.map((tag) => tag._id) } });
@@ -357,19 +363,61 @@ class ApplicationModel {
       searchConditions.push(...wordConditions);
     }
 
-    if (searchConditions.length === 0) {
-      return [];
-    }
-
-    const searchCriteria =
+    const baseMatchCondition =
       searchConditions.length > 0 ? { $or: searchConditions } : {};
 
-    const searchResult = await Question.find(searchCriteria)
-      .sort({ ask_date_time: -1 })
-      .exec();
-    return searchResult && searchResult.length > 0
-      ? await this.addTagToQuestion(searchResult)
-      : searchResult;
+    let sortStage = {};
+    let matchStage = {};
+    let countMatchCondition = {};
+
+    switch (order) {
+      case "newest":
+        {
+          sortStage = { $sort: { ask_date_time: -1 } };
+          matchStage = { $match: baseMatchCondition };
+          countMatchCondition = baseMatchCondition;
+        }
+        break;
+      case "unanswered":
+        {
+          const unansweredMatchCondition = {
+            ...baseMatchCondition,
+            answers: { $size: 0 },
+          };
+          matchStage = { $match: unansweredMatchCondition };
+          sortStage = { $sort: { ask_date_time: -1 } };
+          countMatchCondition = unansweredMatchCondition;
+        }
+        break;
+      case "active":
+        {
+          sortStage = { $sort: { lastActivity: -1 } };
+          matchStage = { $match: baseMatchCondition };
+          countMatchCondition = baseMatchCondition;
+        }
+        break;
+      default:
+        throw new Error("Invalid order specified");
+    }
+
+    const skipStage = { $skip: (page - 1) * limit };
+    const limitStage = { $limit: limit };
+
+    const aggregationPipeline = [matchStage, sortStage, skipStage, limitStage];
+    const questions = await Question.aggregate(aggregationPipeline).exec();
+    const searchResults = questions.map((questionData) => {
+      const questionDoc = new Question(questionData);
+      return questionDoc.toObject({ virtuals: true });
+    });
+
+    const results = await this.addTagToQuestion(searchResults);
+
+    const total = await Question.countDocuments(countMatchCondition);
+
+    return {
+      questions: results,
+      total,
+    };
   }
 
   static async getTagsWithCounts() {
@@ -391,7 +439,7 @@ class ApplicationModel {
     return await Tag.find({ _id: { $in: tagIds } });
   }
 
-  static async getCommentsByQuestionId(qid, page, limit) {
+  static async getCommentsByQuestionId(qid, page, limit = 3) {
     try {
       const skip = (page - 1) * limit;
       const questionForCount = await Question.findById(qid).exec();
@@ -425,7 +473,7 @@ class ApplicationModel {
     }
   }
 
-  static async getCommentsByAnsId(ansId, page, limit) {
+  static async getCommentsByAnsId(ansId, page = 1, limit = 3) {
     try {
       const skip = (page - 1) * limit;
       const answerForCount = await Answer.findById(ansId).exec();
@@ -559,7 +607,7 @@ class ApplicationModel {
 
       const user = await User.findById(answer.authorid);
       if (!user) {
-        throw new Error("User not found");ß
+        throw new Error("User not found");
       }
 
       user.reputation += deltaRep;

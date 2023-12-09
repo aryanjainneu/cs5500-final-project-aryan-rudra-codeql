@@ -18,18 +18,15 @@ const HomePage = ({
   setCurrentQID,
   user,
   setUser,
-
 }) => {
-  
   const [currentPaginationPage, setCurrentPaginationPage] = useState(1);
   const [loadingError, setLoadingError] = useState("");
   const [totalPages, setTotalPages] = useState(0);
   const [totalQuestionCount, setTotalQuestionCount] = useState(0);
-  const [currentFilter,setCurrentFilter] = useState('newest');
-
+  const [currentFilter, setCurrentFilter] = useState("newest");
 
   const fetchQuestions = async (page) => {
-    setLoadingError('');
+    setLoadingError("");
     try {
       const data = await appModel.getQuestionsWithTags(
         currentFilter,
@@ -40,9 +37,10 @@ const HomePage = ({
       setQuestions(data.questions);
       setTotalPages(data.totalPages);
     } catch (error) {
-      setLoadingError(error.response.data||"Error Loading Questions");
-    } 
+      setLoadingError(error.response.data || "Error Loading Questions");
+    }
   };
+
   const handleNextClick = () => {
     const nextPage = currentPaginationPage + 1;
     if (nextPage <= totalPages) {
@@ -58,15 +56,16 @@ const HomePage = ({
   };
 
   const filterQuestion = async (filter) => {
+    setLoadingError("");
     try {
       const data = await appModel.getQuestionsWithTags(filter.toLowerCase());
-      setTotalQuestionCount(data.totalQuestionCount);
+      setTotalQuestionCount(data.total);
       setQuestions(data.questions);
       setCurrentFilter(filter.toLowerCase());
       setTotalPages(data.totalPages);
       setCurrentPaginationPage(1);
     } catch (error) {
-      console.error("Could not Filter Question:", error);
+      setLoadingError(error.response.data || "Error Loading Questions");
     }
   };
 
@@ -86,10 +85,10 @@ const HomePage = ({
       <MainBodySecHeader
         numberOfQuestions={totalQuestionCount}
         filterQuestion={filterQuestion}
-        currentFilter = {currentFilter}
+        currentFilter={currentFilter}
       />
       <div className="questionListContainer">
-        { loadingError ? (
+        {loadingError ? (
           <div className="error">{loadingError}</div> // Display error message
         ) : (
           <QuestionList
@@ -114,7 +113,8 @@ const HomePage = ({
           >
             Next
           </button>
-        </div>ß
+        </div>
+        ß
       </div>
     </div>
   );

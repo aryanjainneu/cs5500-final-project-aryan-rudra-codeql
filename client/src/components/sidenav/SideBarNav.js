@@ -32,7 +32,7 @@ const SideBarNav = ({currentPage,setCurrentPage,handleQuestionNavClick,user,setU
     <div id="sideBarNav">
       <a
         href="#"
-        className={`sideBarLink ${currentPage === 'all-questions' ||currentPage.includes('ask-question') ||currentPage.includes('questionDetail') || currentPage.includes('searchResults') || currentPage.includes('new-answer') ? 'activeLink' : ''}`}
+        className={`sideBarLink ${currentPage === 'all-questions' ||currentPage.includes('ask-question') ||currentPage.includes('questionDetail') || currentPage.includes('search-result') || currentPage.includes('new-answer') ? 'activeLink' : ''}`}
         id="questionpage"
         onClick={handleQuestionNavClick}
       >

@@ -1,4 +1,4 @@
-import React, { useState, /*useEffect*/ } from "react";
+import React, { useState /*useEffect*/ } from "react";
 // import { BrowserRouter as Router } from 'react-router-dom';
 import Header from "./components/header/Header";
 // import RoutesComponent from './RouterComponent.js'
@@ -12,7 +12,7 @@ import AskQuestionForm from "./components/NewQuestionPage/AskQuestionForm";
 // import SearchPage from './components/HomePage/SearchPage'
 import TaggedQuestionPage from "./components/TagPage/TaggedQuestionPage";
 import WelcomePage from "./Welcome";
-
+import SearchPage from "./components/HomePage/SearchPage";
 const appModel = new ApplicationModel();
 
 const App = () => {
@@ -66,31 +66,9 @@ const App = () => {
     }
   };
 
-  const handleSearch = async (e) => {
-    if (e.key === "Enter") {
-      setSearchTerm(e.target.value);
-      const term = e.target.value.toLowerCase();
-      try {
-        if (term) {
-          const searchedQuestion = await appModel.searchQuestions(term);
-          setQuestions(searchedQuestion);
-        } else {
-          const updatedQuestions = await appModel.getQuestionsWithTags(
-            "newest"
-          );
-          setQuestions(updatedQuestions);
-        }
-        // setCurrentPage('all-questions');
-      } catch (error) {
-        console.log("search failed :", error);
-      }
+ 
 
-      return true;
-    }
-    return false;
-  };
 
-  
 
   const handleQuestionNavClick = async () => {
     try {
@@ -108,10 +86,6 @@ const App = () => {
     setCurrentPage("tagged-question");
   };
 
-
-
- 
-
   return (
     <div>
       {currentPage === "welcome" ? (
@@ -126,8 +100,8 @@ const App = () => {
         <>
           <Header
             headerText={headerText}
-            onSearch={handleSearch}
             setCurrentPage={setCurrentPage}
+            setSearchTerm={setSearchTerm}
           />
           <div id="main" className="main">
             <SideBarNav
@@ -151,7 +125,20 @@ const App = () => {
                   setCurrentQID={setCurrentQID}
                   user={user}
                   setUser={setUser}
-              
+                />
+              )}
+
+              {currentPage === "search-result" && (
+                <SearchPage
+                  questions={questions}
+                  setQuestions={setQuestions}
+                  incrementViewCount={incrementViewCount}
+                  handleAskQuestionClick={handleAskQuestionClick}
+                  setCurrentPage={setCurrentPage}
+                  searchTerm={searchTerm}
+                  setCurrentQID={setCurrentQID}
+                  user={user}
+                  setUser={setUser}
                 />
               )}
 

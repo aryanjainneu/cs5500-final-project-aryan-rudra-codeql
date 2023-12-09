@@ -174,8 +174,17 @@ class ApplicationController {
 
   static async searchQuestions(req, res) {
     try {
-      const questions = await ApplicationModel.searchQuestions(req.query.q);
-      res.json(questions);
+      const query = req.query.q;
+      const order = req.query.order;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const { questions, total } = await ApplicationModel.searchQuestions(query, order, page, limit);
+      res.json({
+        questions,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
     } catch (error) {
       res.status(500).send(error.message);
     }
