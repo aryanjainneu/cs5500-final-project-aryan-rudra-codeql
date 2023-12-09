@@ -35,9 +35,8 @@ class ApplicationModel {
     return await Tag.find({});
   }
   static async addQuestion(title, text, tagsInput, authorId, askDate) {
-    
     const user = await User.findById(authorId);
-    const tagIds = await this.addNewTags(tagsInput,user);
+    const tagIds = await this.addNewTags(tagsInput, user);
     const username = user.username;
     if (!user) {
       throw new Error("User not found");
@@ -47,7 +46,7 @@ class ApplicationModel {
       text,
       tags: tagIds,
       asked_by: username,
-      authorid : authorId,
+      authorid: authorId,
       ask_date_time: askDate,
     });
   }
@@ -64,23 +63,22 @@ class ApplicationModel {
   static async addNewTags(tagInput, user) {
     const tagIds = [];
     for (const tagName of tagInput) {
-        let tag = await Tag.findOne({
-            name: { $regex: new RegExp("^" + tagName + "$", "i") },
-        });
+      let tag = await Tag.findOne({
+        name: { $regex: new RegExp("^" + tagName + "$", "i") },
+      });
 
-        if (!tag) {
-            // Only create a new tag if the user's reputation is 50 or higher
-            if (user.reputation < 50) {
-                throw new Error("Insufficient reputation to create new tags");
-            }
-            tag = await Tag.create({ name: tagName });
+      if (!tag) {
+        // Only create a new tag if the user's reputation is 50 or higher
+        if (user.reputation < 50) {
+          throw new Error("Insufficient reputation to create new tags");
         }
-        tagIds.push(tag._id);
+        tag = await Tag.create({ name: tagName });
+      }
+      tagIds.push(tag._id);
     }
 
     return tagIds;
-}
-
+  }
 
   static async addAnswer(text, authorId, qid, date) {
     const user = await User.findById(authorId);
@@ -90,11 +88,13 @@ class ApplicationModel {
     const answer = await Answer.create({
       text,
       ans_by: user.username,
-      authorid:authorId,
+      authorid: authorId,
+      qid: qid,
       ans_date_time: date,
     });
     await Question.findByIdAndUpdate(qid, {
       $push: { answers: answer._id },
+      $set: { lastActivity: date },
     });
   }
 
@@ -252,30 +252,15 @@ class ApplicationModel {
     if (page < 1 || page > totalPages) {
       throw new Error("Invalid page number");
     }
-    const mostActiveQuestions = await Question.aggregate([
-      {
-        $lookup: {
-          from: "answers",
-          localField: "answers",
-          foreignField: "_id",
-          as: "fetchedAnswers",
-        },
-      },
-      {
-        $addFields: {
-          lastActivityDate: { $max: "$fetchedAnswers.ans_date_time" },
-        },
-      },
-      { $sort: { lastActivityDate: -1 } },
-      { $unset: "fetchedAnswers" },
-    ])
+
+    const mostActiveQuestions = await Question.find({})
+      .sort({ latestActivity: -1 }) // Sort by the lastActivity field
       .skip((page - 1) * limit)
       .limit(limit)
       .exec();
 
     return mostActiveQuestions.map((question) => {
-      const questionDoc = new Question(question);
-      return questionDoc.toObject({ virtuals: true });
+      return question.toObject({ virtuals: true });
     });
   }
 
@@ -541,15 +526,18 @@ class ApplicationModel {
 
       // Update the vote count of the question
       question.votes += deltaVote;
-      await question.save();
+      question.latestActivity = new Date();
 
       // Update the reputation of the user who posted the question
       // Assuming the author's ID is stored in `authorid`
       const user = await User.findById(question.authorid);
-      if (user) {
-        user.reputation += deltaRep;
-        await user.save();
+      if (!user) {
+        throw new Error("User not found");
       }
+      await question.save();
+      user.reputation += deltaRep;
+
+      await user.save();
     } catch (error) {
       console.error("Error in updateQuestionVoteCount:", error);
       throw error;
@@ -558,23 +546,26 @@ class ApplicationModel {
 
   static async updateAnswerVoteCount(aid, deltaRep, deltaVote) {
     try {
-      // Find the answer by ID
       const answer = await Answer.findById(aid);
       if (!answer) {
         throw new Error("Answer not found");
       }
-
-      // Update the vote count of the answer
       answer.votes += deltaVote;
-      await answer.save();
-
-      // Update the reputation of the user who posted the answer
-      // Assuming the author's ID is stored in `authorid`
-      const user = await User.findById(answer.authorid);
-      if (user) {
-        user.reputation += deltaRep;
-        await user.save();
+      const question = await Question.findById(answer.qid);
+      if (!question) {
+        throw new Error("No associated Question found");
       }
+      question.latestActivity = new Date();
+
+      const user = await User.findById(answer.authorid);
+      if (!user) {
+        throw new Error("User not found");ß
+      }
+
+      user.reputation += deltaRep;
+      await user.save();
+      await question.save();
+      await answer.save();
     } catch (error) {
       console.error("Error in updateAnswerVoteCount:", error);
       throw error;
