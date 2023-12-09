@@ -272,8 +272,10 @@ class ApplicationController {
     try {
       const {author,text,ansId} = req.body;
       const authorid = req.session.userId;
-      await ApplicationModel.postCommentForAnsId(text,author,authorid,ansId);
-      res.status(201).json({message:'comment created successfully'});
+     const comment = await ApplicationModel.postCommentForAnsId(text,author,authorid,ansId);
+      res.status(201).json(
+        comment,
+        {message:'comment created successfully'});
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -283,8 +285,10 @@ class ApplicationController {
     try {
       const {author,text,qid} = req.body;
       const authorid = req.session.userId;
-      await ApplicationModel.postCommentForQid(text,author,authorid,qid);
-      res.status(201).json({message:'comment created successfully'});
+      const comment = await ApplicationModel.postCommentForQid(text,author,authorid,qid);
+      res.status(201).json({
+        comment,  
+        message:'comment created successfully'});
     } catch (error) {
       res.status(500).send(error.message);
     }

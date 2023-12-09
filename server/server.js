@@ -50,7 +50,8 @@ app.use(
       collectionName: "sessions", // Optional, 'sessions' by default
     }),
     cookie: {
-      expires: 24 * 3600,
+      httpOnly:true,
+      secure:false
     },
   })
 );

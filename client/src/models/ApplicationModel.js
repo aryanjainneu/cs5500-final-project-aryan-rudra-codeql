@@ -3,7 +3,7 @@ class ApplicationModel {
   constructor() {
     this.api = axios.create({
       baseURL: "http://localhost:8000/api",
-      withCredentials: true
+      withCredentials: true,
     });
   }
 
@@ -200,7 +200,7 @@ class ApplicationModel {
   async getCommentsForQuestion(qid, page = 1, limit = 5) {
     try {
       const response = await this.api.get(`/question/comments`, {
-        params: { qid, page, limit }
+        params: { qid, page, limit },
       });
       const commentsWithDates = response.data.comments.map((item) => {
         const askDateConverted = new Date(item.dateOfComment);
@@ -227,6 +227,8 @@ class ApplicationModel {
       throw error;
     }
   }
+
+  
 
   async getCommentsForAnswer(aid, page = 1, limit = 5) {
     try {
@@ -258,26 +260,6 @@ class ApplicationModel {
       throw error;
     }
   }
-
-  convertCommentDateStringToDate(comments) {
-    const questionsWithDates = comments.map((item) => {
-      const askDateConverted = new Date(item.question.askDate);
-      if (isNaN(askDateConverted.getTime())) {
-        throw new Error(
-          `Invalid date string received: ${item.question.askDate}`
-        );
-      }
-      return {
-        ...item,
-        question: {
-          ...item.question,
-          askDate: askDateConverted,
-        },
-      };
-    });
-    return questionsWithDates;
-  }
-
   convertQuestionDateStringToDate(questions) {
     const questionsWithDates = questions.map((item) => {
       const askDateConverted = new Date(item.question.askDate);
@@ -374,6 +356,7 @@ class ApplicationModel {
         author,
         ansId,
       });
+      response.data.comment = this.convertCommentDateStringToDate(response.data.comment);
       return response.data;
     } catch (error) {
       console.error("Error posting comment for answer", error);
@@ -381,13 +364,25 @@ class ApplicationModel {
     }
   }
 
+  convertCommentDateStringToDate(item) {
+    const askDateConverted = new Date(item.dateOfComment);
+    if (isNaN(askDateConverted.getTime())) {
+      throw new Error(`Invalid date string received: ${item.question.askDate}`);
+    }
+    return {
+      ...item,
+      dateOfComment: askDateConverted,
+    };
+  }
+
   async postCommentForQuestion(text, author, qid) {
     try {
       const response = await this.api.post("/question/comments", {
         text,
         author,
-        qid
+        qid,
       });
+      response.data.comment = this.convertCommentDateStringToDate(response.data.comment);
       return response.data;
     } catch (error) {
       console.error("Error posting comment for question", error);
