@@ -1,5 +1,5 @@
-const ApplicationModel = require('../../models/ApplicationModel');
-const User = require('../../models/user');
+const ApplicationModel = require("../../models/ApplicationModel");
+const User = require("../../models/user");
 
 class ApplicationController {
   static async getQuestions(req, res) {
@@ -13,7 +13,13 @@ class ApplicationController {
 
   static async addQuestion(req, res) {
     try {
-      const question = await ApplicationModel.addQuestion(req.body.title, req.body.text, req.body.tagsInput, req.body.askedBy, req.body.askDate);
+      const question = await ApplicationModel.addQuestion(
+        req.body.title,
+        req.body.text,
+        req.body.tagsInput,
+        req.body.askedBy,
+        req.body.askDate
+      );
       res.status(201).json(question);
     } catch (error) {
       res.status(500).send(error.message);
@@ -26,9 +32,9 @@ class ApplicationController {
 
       await ApplicationModel.addUser(username, email, password);
 
-      res.status(201).json({ message: 'User registered successfully'});
+      res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
 
       if (error.code === 11000) {
         const field = Object.keys(error.keyPattern)[0];
@@ -36,28 +42,30 @@ class ApplicationController {
         return res.status(409).json({ message }); // 409 Conflict
       }
 
-      res.status(500).json({ message: 'Error registering new user' });
+      res.status(500).json({ message: "Error registering new user" });
     }
   }
 
   static async addAnswer(req, res) {
     try {
-      
       const { text, ansBy, qid, ansDate } = req.body;
-      const answer = await ApplicationModel.addAnswer(text, ansBy, qid, new Date(ansDate));
+      const answer = await ApplicationModel.addAnswer(
+        text,
+        ansBy,
+        qid,
+        new Date(ansDate)
+      );
       res.status(201).json(answer);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   }
 
-
-
   static async getQuestionById(req, res) {
     try {
       const question = await ApplicationModel.getQuestionById(req.params.qid);
       if (!question) {
-        return res.status(404).send('Question not found');
+        return res.status(404).send("Question not found");
       }
       res.json(question);
     } catch (error) {
@@ -69,12 +77,12 @@ class ApplicationController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 5;
-      const {answers,total} = await ApplicationModel.getAnswersForQuestion(req.params.qid,page,limit);
-      res.json({answers,
-        total,
+      const { answers, total } = await ApplicationModel.getAnswersForQuestion(
+        req.params.qid,
         page,
-        totalPages: Math.ceil(total / limit),
-      });
+        limit
+      );
+      res.json({ answers, total, page, totalPages: Math.ceil(total / limit) });
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -82,7 +90,9 @@ class ApplicationController {
 
   static async getQuestionsByTag(req, res) {
     try {
-      const questions = await ApplicationModel.getQuestionsByTag(req.params.tid);
+      const questions = await ApplicationModel.getQuestionsByTag(
+        req.params.tid
+      );
       res.json(questions);
     } catch (error) {
       res.status(500).send(error.message);
@@ -93,9 +103,14 @@ class ApplicationController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 5;
-      const order = req.params.order; 
+      const order = req.params.order;
 
-      const { questions, total } = await ApplicationModel.getQuestionsWithTags(order,null, page, limit);
+      const { questions, total } = await ApplicationModel.getQuestionsWithTags(
+        order,
+        null,
+        page,
+        limit
+      );
 
       res.json({
         questions,
@@ -107,7 +122,6 @@ class ApplicationController {
       res.status(500).send(error.message);
     }
   }
-
 
   static async getNewestQuestionsFirst(req, res) {
     try {
@@ -129,7 +143,8 @@ class ApplicationController {
 
   static async getActiveQuestionsFirst(req, res) {
     try {
-      const mostActiveQuestions = await ApplicationModel.getActiveQuestionsFirst();
+      const mostActiveQuestions =
+        await ApplicationModel.getActiveQuestionsFirst();
       res.json(mostActiveQuestions);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -148,7 +163,7 @@ class ApplicationController {
   static async incrementViewCount(req, res) {
     try {
       await ApplicationModel.incrementViewCount(req.params.qid);
-      res.send('View count incremented');
+      res.send("View count incremented");
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -175,7 +190,9 @@ class ApplicationController {
   static async getQuestionsWithTags(req, res) {
     try {
       // Assuming questions are passed in the body of the request. Adjust as needed for your API design.
-      const questionsWithTags = await ApplicationModel.getQuestionsWithTags(req.body.questions);
+      const questionsWithTags = await ApplicationModel.getQuestionsWithTags(
+        req.body.questions
+      );
       res.json(questionsWithTags);
     } catch (error) {
       res.status(500).send(error.message);
@@ -197,47 +214,48 @@ class ApplicationController {
       const user = await User.loginUser(username, password);
 
       req.session.userId = user._id;
-      res.json({user});
+      res.json({ user });
     } catch (error) {
-      console.error('Login error:', error.message);
-      res.status(401).json({ message: error.message || 'An error occurred while attempting to log in' });
+      console.error("Login error:", error.message);
+      res
+        .status(401)
+        .json({
+          message:
+            error.message || "An error occurred while attempting to log in",
+        });
     }
   }
 
   static async logout(req, res) {
     try {
-     
       if (req.session) {
-        req.session.destroy(err => {
+        req.session.destroy((err) => {
           if (err) {
-        
-            console.error('Logout error:', err);
-            res.status(500).json({ message: 'Error occurred during logout' });
+            console.error("Logout error:", err);
+            res.status(500).json({ message: "Error occurred during logout" });
           } else {
-    
-            res.clearCookie('connect.sid'); 
-            res.json({ message: 'Successfully logged out' });
+            res.clearCookie("connect.sid");
+            res.json({ message: "Successfully logged out" });
           }
         });
       } else {
-     
-        res.json({ message: 'No active session' });
+        res.json({ message: "No active session" });
       }
     } catch (error) {
-      console.error('Logout error:', error);
-      res.status(500).json({ message: 'An error occurred while attempting to log out' });
+      console.error("Logout error:", error);
+      res
+        .status(500)
+        .json({ message: "An error occurred while attempting to log out" });
     }
   }
-
-
-
 
   static async getCommentsByQid(req, res) {
     try {
       const qid = req.query.qid;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 5;
-      const { comments, total } = await ApplicationModel.getCommentsByQuestionId(qid, page, limit);
+      const { comments, total } =
+        await ApplicationModel.getCommentsByQuestionId(qid, page, limit);
 
       res.json({
         comments,
@@ -250,13 +268,16 @@ class ApplicationController {
     }
   }
 
-
   static async getCommentsByAnsId(req, res) {
     try {
       const aid = req.query.aid;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 5;
-      const { comments, total } = await ApplicationModel.getCommentsByAnsId(aid, page, limit);
+      const { comments, total } = await ApplicationModel.getCommentsByAnsId(
+        aid,
+        page,
+        limit
+      );
 
       res.json({
         comments,
@@ -270,12 +291,18 @@ class ApplicationController {
   }
   static async postCommentForAnsId(req, res) {
     try {
-      const {author,text,ansId} = req.body;
+      const { author, text, ansId } = req.body;
       const authorid = req.session.userId;
-     const comment = await ApplicationModel.postCommentForAnsId(text,author,authorid,ansId);
+      const comment = await ApplicationModel.postCommentForAnsId(
+        text,
+        author,
+        authorid,
+        ansId
+      );
       res.status(201).json({
         comment,
-        message:'comment created successfully'});
+        message: "comment created successfully",
+      });
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -283,12 +310,18 @@ class ApplicationController {
 
   static async postCommentForQid(req, res) {
     try {
-      const {author,text,qid} = req.body;
+      const { author, text, qid } = req.body;
       const authorid = req.session.userId;
-      const comment = await ApplicationModel.postCommentForQid(text,author,authorid,qid);
+      const comment = await ApplicationModel.postCommentForQid(
+        text,
+        author,
+        authorid,
+        qid
+      );
       res.status(201).json({
-        comment,  
-        message:'comment created successfully'});
+        comment,
+        message: "comment created successfully",
+      });
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -296,19 +329,39 @@ class ApplicationController {
 
   static async updateCommentVoteCount(req, res) {
     try {
-      const {cid,votes} = req.body.params;
-      await ApplicationModel.updateCommentVoteCount(cid,votes);
-      res.status(201).json({ 
-        message:'vote increased successfully'});
+      const { cid, votes } = req.body.params;
+      await ApplicationModel.updateCommentVoteCount(cid, votes);
+      res.status(201).json({
+        message: "vote increased successfully",
+      });
     } catch (error) {
       res.status(500).send(error.message);
     }
   }
 
+  static async updateQuestionVoteCount(req, res) {
+    try {
+      const { qid, deltaRep, deltaVote } = req.body.params;
+      await ApplicationModel.updateQuestionVoteCount(qid, deltaRep, deltaVote);
+      res.status(201).json({
+        message: "vote changed successfully",
+      });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
 
-
+  static async updateAnswerVoteCount(req, res) {
+    try {
+      const { aid, deltaRep, deltaVote } = req.body.params;
+      await ApplicationModel.updateAnswerVoteCount(aid, deltaRep, deltaVote);
+      res.status(201).json({
+        message: "vote changed successfully",
+      });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
 }
-
-
 
 module.exports = ApplicationController;

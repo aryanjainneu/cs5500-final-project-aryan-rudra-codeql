@@ -17,8 +17,6 @@ const QuestionDetailPage = ({
   // const { qid } = useParams();
   const [question, setQuestion] = useState(null);
   const [answers, setAnswers] = useState(null);
-
-  const [loading, setLoading] = useState(false);
   const [currentPaginationPage, setCurrentPaginationPage] = useState(1);
   const [loadingError, setLoadingError] = useState("");
   const [totalPages, setTotalPages] = useState(0);
@@ -29,7 +27,7 @@ const QuestionDetailPage = ({
   };
 
   const fetchData = async (page) => {
-    setLoading(true);
+    setLoadingError('');
     try {
       const q = await appModel.getQuestionById(qid);
       const data = await appModel.getAnswersForQuestion(qid, page, PAGE_SIZE);
@@ -38,9 +36,7 @@ const QuestionDetailPage = ({
       setAnswers(data.answers);
     } catch (error) {
       setLoadingError(error.message || "Failed to fetch question or answers:");
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -69,7 +65,7 @@ const QuestionDetailPage = ({
             <AnswerHeader
               numAnswers={question.ansIds.length}
               questionTitle={question.title}
-              handleAskQuestionClick={handleAskQuestionClick}
+              handleAskQuestionClick={handleAskQuestionClick} 
             />
             <QuestionBody question={question} qid={qid} user={user} />
 
@@ -77,9 +73,7 @@ const QuestionDetailPage = ({
           </div>
 
           <div className="answerListContainer">
-            {loading ? (
-              <div>Loading answers...</div>
-            ) : loadingError ? (
+            {loadingError ? (
               <div className="error">{loadingError}</div>
             ) : answers.length === 0 ? (
               <div className="noComments">No Answers to display.</div>

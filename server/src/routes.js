@@ -97,4 +97,14 @@ router.get("/answer/comments", ApplicationController.getCommentsByAnsId);
 
 router.put("/comment/upvote", ApplicationController.updateCommentVoteCount);
 
+router.put(
+  "/question/updatevotecount",
+  ApplicationController.updateQuestionVoteCount
+);
+
+router.put(
+  "/answer/updatevotecount",
+  ApplicationController.updateAnswerVoteCount
+);
+
 module.exports = router;

@@ -512,6 +512,55 @@ class ApplicationModel {
       throw error;
     }
   }
+
+  static async updateQuestionVoteCount(qid, deltaRep, deltaVote) {
+    try {
+      const question = await Question.findById(qid);
+      if (!question) {
+        throw new Error("Question not found");
+      }
+
+      // Update the vote count of the question
+      question.votes += deltaVote;
+      await question.save();
+
+      // Update the reputation of the user who posted the question
+      // Assuming the author's ID is stored in `authorid`
+      const user = await User.findById(question.authorid);
+      if (user) {
+        user.reputation += deltaRep;
+        await user.save();
+      }
+    } catch (error) {
+      console.error("Error in updateQuestionVoteCount:", error);
+      throw error;
+    }
+  }
+
+  static async updateAnswerVoteCount(aid, deltaRep, deltaVote) {
+    try {
+      // Find the answer by ID
+      const answer = await Answer.findById(aid);
+      if (!answer) {
+        throw new Error("Answer not found");
+      }
+
+      // Update the vote count of the answer
+      answer.votes += deltaVote;
+      await answer.save();
+
+      // Update the reputation of the user who posted the answer
+      // Assuming the author's ID is stored in `authorid`
+      const user = await User.findById(answer.authorid);
+      if (user) {
+        user.reputation += deltaRep;
+        await user.save();
+      }
+    } catch (error) {
+      console.error("Error in updateAnswerVoteCount:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = ApplicationModel;

@@ -1,9 +1,7 @@
 import axios from "axios";
 class ApplicationModel {
-
   static instance;
   constructor() {
-
     if (ApplicationModel.instance) {
       return ApplicationModel.instance;
     }
@@ -137,14 +135,38 @@ class ApplicationModel {
     }
   }
 
-  async updateCommentVoteCount(cid,votes) {
+  async updateCommentVoteCount(cid, votes) {
     try {
-      const response = await this.api.put(`/comment/upvote`,{
+      const response = await this.api.put(`/comment/upvote`, {
         params: { cid, votes },
       });
       return response.data;
     } catch (error) {
-      console.error("Error incrementing question views", error);
+      console.error("Error incrementing comment votes", error);
+      throw error;
+    }
+  }
+
+  async updateQuestionVoteCount(qid, deltaRep, deltaVote) {
+    try {
+      const response = await this.api.put(`question/updatevotecount`, {
+        params: { qid, deltaRep, deltaVote },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error incrementing question votes", error);
+      throw error;
+    }
+  }
+
+  async updateAnswerVoteCount(aid, deltaRep, deltaVote) {
+    try {
+      const response = await this.api.put(`/answer/updatevotecount`, {
+        params: { aid, deltaRep, deltaVote },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error incrementing answer views", error);
       throw error;
     }
   }
@@ -247,8 +269,6 @@ class ApplicationModel {
       throw error;
     }
   }
-
-  
 
   async getCommentsForAnswer(aid, page = 1, limit = 5) {
     try {
@@ -376,7 +396,9 @@ class ApplicationModel {
         author,
         ansId,
       });
-      response.data.comment = this.convertCommentDateStringToDate(response.data.comment);
+      response.data.comment = this.convertCommentDateStringToDate(
+        response.data.comment
+      );
       return response.data;
     } catch (error) {
       console.error("Error posting comment for answer", error);
@@ -402,7 +424,9 @@ class ApplicationModel {
         author,
         qid,
       });
-      response.data.comment = this.convertCommentDateStringToDate(response.data.comment);
+      response.data.comment = this.convertCommentDateStringToDate(
+        response.data.comment
+      );
       return response.data;
     } catch (error) {
       console.error("Error posting comment for question", error);
