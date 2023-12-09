@@ -1,10 +1,9 @@
-
-const Question = require('./questions');
-const Answer = require('./answers');
-const Tag = require('./tags');
-const User = require('./user');
-const Comment = require('./comment');
-const bcrypt = require('bcrypt');
+const Question = require("./questions");
+const Answer = require("./answers");
+const Tag = require("./tags");
+const User = require("./user");
+const Comment = require("./comment");
+const bcrypt = require("bcrypt");
 
 class ApplicationModel {
   static instance = null;
@@ -22,61 +21,61 @@ class ApplicationModel {
     const total = await Question.countDocuments();
 
     return {
-        total,
-        page,
-        pageSize: questions.length,
-        data: questions.map(question => question.toObject({ virtuals: true })),
+      total,
+      page,
+      pageSize: questions.length,
+      data: questions.map((question) => question.toObject({ virtuals: true })),
     };
-}
+  }
   static async getAnswers() {
     const answers = await Answer.find({});
-    return answers.map(answer => answer.toObject({ virtuals: true }));
+    return answers.map((answer) => answer.toObject({ virtuals: true }));
   }
   static async getTags() {
     return await Tag.find({});
   }
   static async addQuestion(title, text, tagsInput, askedBy, askDate) {
-    const tagIds = await this.addNewTags(tagsInput); 
+    const tagIds = await this.addNewTags(tagsInput);
     return await Question.create({
       title,
       text,
       tags: tagIds,
-      asked_by: askedBy, 
-      ask_date_time: askDate 
+      asked_by: askedBy,
+      ask_date_time: askDate,
     });
   }
 
   static async addUser(username, email, password) {
-
     const hashedPassword = await bcrypt.hash(password, 10);
     return await User.create({
       username,
       password: hashedPassword,
       email,
-    })
+    });
   }
 
   static async addNewTags(tagInput) {
     const tagIds = [];
     for (const tagName of tagInput) {
-      let tag = await Tag.findOne({ name: { $regex: new RegExp('^' + tagName + '$', 'i') } });
+      let tag = await Tag.findOne({
+        name: { $regex: new RegExp("^" + tagName + "$", "i") },
+      });
       if (!tag) {
-        tag = await Tag.create({ name: tagName});
+        tag = await Tag.create({ name: tagName });
       }
       tagIds.push(tag._id);
     }
     return tagIds;
   }
-  
 
   static async addAnswer(text, author, qid, date) {
     const answer = await Answer.create({
       text,
-      ans_by: author, 
-      ans_date_time: date 
+      ans_by: author,
+      ans_date_time: date,
     });
     await Question.findByIdAndUpdate(qid, {
-      $push: { answers: answer._id } 
+      $push: { answers: answer._id },
     });
   }
 
@@ -97,16 +96,16 @@ class ApplicationModel {
   //   try {
   //     const question = await Question.findById(qid)
   //                                     .populate({
-  //                                         path: 'answers', 
+  //                                         path: 'answers',
   //                                         options: { sort: { 'ans_date_time': -1 } }
   //                                     })
   //                                     .exec();
-  
+
   //     if (!question) {
   //       return [];
   //     }
   //     const answers = question.answers.map(answer => answer.toObject({ virtuals: true }));
-  
+
   //     return answers;
   //   } catch (error) {
   //     console.error("Error in getAnswersForQuestion:", error);
@@ -116,47 +115,49 @@ class ApplicationModel {
 
   static async getAnswersForQuestion(qid, page, limit) {
     try {
-        // Find the question without populating answers to get the total count
-        const questionForCount = await Question.findById(qid).exec();
+      // Find the question without populating answers to get the total count
+      const questionForCount = await Question.findById(qid).exec();
 
-        if (!questionForCount || !questionForCount.answers) {
-            return { answers: [], totalAnswers: 0 };
-        }
+      if (!questionForCount || !questionForCount.answers) {
+        return { answers: [], totalAnswers: 0 };
+      }
 
-        const total = questionForCount.answers.length;
+      const total = questionForCount.answers.length;
 
-        
-        const questionWithPaginatedAnswers = await Question.findById(qid)
-                                                           .populate({
-                                                               path: 'answers',
-                                                               options: { 
-                                                                   sort: { 'ans_date_time': -1 },
-                                                                   limit: limit,
-                                                                   skip: limit * (page - 1)
-                                                               }
-                                                           })
-                                                           .exec();
+      const questionWithPaginatedAnswers = await Question.findById(qid)
+        .populate({
+          path: "answers",
+          options: {
+            sort: { ans_date_time: -1 },
+            limit: limit,
+            skip: limit * (page - 1),
+          },
+        })
+        .exec();
 
-        if (!questionWithPaginatedAnswers) {
-            return { answers: [], total: 0 };
-        }
+      if (!questionWithPaginatedAnswers) {
+        return { answers: [], total: 0 };
+      }
 
-       
-        const answers = questionWithPaginatedAnswers.answers.map(answer => answer.toObject({ virtuals: true }));
+      const answers = questionWithPaginatedAnswers.answers.map((answer) =>
+        answer.toObject({ virtuals: true })
+      );
 
-        return { answers, total };
+      return { answers, total };
     } catch (error) {
-        console.error("Error in getAnswersForQuestion:", error);
-        throw error;
+      console.error("Error in getAnswersForQuestion:", error);
+      throw error;
     }
-}
-
-
+  }
 
   static async getQuestionsByTag(tid) {
-    const taggedQuestions = await Question.find({ tags: tid }).sort({ ask_date_time: -1 });
-    const questions =  taggedQuestions.map(question => question.toObject({ virtuals: true }));
-    return await this.addTagToQuestion(questions) 
+    const taggedQuestions = await Question.find({ tags: tid }).sort({
+      ask_date_time: -1,
+    });
+    const questions = taggedQuestions.map((question) =>
+      question.toObject({ virtuals: true })
+    );
+    return await this.addTagToQuestion(questions);
   }
 
   // static async getNewestQuestionsFirst() {
@@ -173,7 +174,7 @@ class ApplicationModel {
   //   const mostActiveQuestions = await Question.aggregate([
   //     {
   //       $lookup: {
-  //         from: 'answers', 
+  //         from: 'answers',
   //         localField: 'answers',
   //         foreignField: '_id',
   //         as: 'fetchedAnswers'
@@ -194,72 +195,70 @@ class ApplicationModel {
   //   });
   // }
 
-static async getNewestQuestionsFirst(page, limit) {
-  const totalCount = await Question.countDocuments();
-  const totalPages = Math.ceil(totalCount / limit);
-
-  // Validate page number
-  if (page < 1 || page > totalPages) {
-      throw new Error('Invalid page number');
-  }
-    const questions = await Question.find({})
-        .sort({ ask_date_time: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
-    return questions.map(question => question.toObject({ virtuals: true }));
-}
-
-static async getUnansweredQuestionsFirst(page, limit) {
-  const totalCount = await Question.countDocuments();
+  static async getNewestQuestionsFirst(page, limit) {
+    const totalCount = await Question.countDocuments();
     const totalPages = Math.ceil(totalCount / limit);
 
     // Validate page number
     if (page < 1 || page > totalPages) {
-        throw new Error('Invalid page number');
+      throw new Error("Invalid page number");
     }
-  const questions = await Question.find({ answers: { $size: 0 } })
+    const questions = await Question.find({})
       .sort({ ask_date_time: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
-  return questions.map(question => question.toObject({ virtuals: true }));
-}
+    return questions.map((question) => question.toObject({ virtuals: true }));
+  }
 
-
-
-static async getActiveQuestionsFirst(page, limit) {
-  const totalCount = await Question.countDocuments();
+  static async getUnansweredQuestionsFirst(page, limit) {
+    const totalCount = await Question.countDocuments();
     const totalPages = Math.ceil(totalCount / limit);
 
     // Validate page number
     if (page < 1 || page > totalPages) {
-        throw new Error('Invalid page number');
+      throw new Error("Invalid page number");
     }
-      const mostActiveQuestions = await Question.aggregate([
+    const questions = await Question.find({ answers: { $size: 0 } })
+      .sort({ ask_date_time: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+    return questions.map((question) => question.toObject({ virtuals: true }));
+  }
+
+  static async getActiveQuestionsFirst(page, limit) {
+    const totalCount = await Question.countDocuments();
+    const totalPages = Math.ceil(totalCount / limit);
+
+    // Validate page number
+    if (page < 1 || page > totalPages) {
+      throw new Error("Invalid page number");
+    }
+    const mostActiveQuestions = await Question.aggregate([
       {
         $lookup: {
-          from: 'answers', 
-          localField: 'answers',
-          foreignField: '_id',
-          as: 'fetchedAnswers'
-        }
+          from: "answers",
+          localField: "answers",
+          foreignField: "_id",
+          as: "fetchedAnswers",
+        },
       },
       {
         $addFields: {
-          lastActivityDate: { $max: '$fetchedAnswers.ans_date_time' }
-        }
+          lastActivityDate: { $max: "$fetchedAnswers.ans_date_time" },
+        },
       },
       { $sort: { lastActivityDate: -1 } },
-      { $unset: 'fetchedAnswers' }
-    ]).skip((page - 1) * limit)
+      { $unset: "fetchedAnswers" },
+    ])
+      .skip((page - 1) * limit)
       .limit(limit)
       .exec();
 
-  return mostActiveQuestions.map(question => {
-    const questionDoc = new Question(question);
-    return questionDoc.toObject({ virtuals: true });
-  });
-}
-  
+    return mostActiveQuestions.map((question) => {
+      const questionDoc = new Question(question);
+      return questionDoc.toObject({ virtuals: true });
+    });
+  }
 
   static async incrementViewCount(questionId) {
     const question = await Question.findById(questionId);
@@ -270,81 +269,86 @@ static async getActiveQuestionsFirst(page, limit) {
   }
 
   static async getQuestionsWithTags(order, questions, page = 1, limit = 5) {
-
     if (!questions) {
       switch (order) {
-        case 'newest':
+        case "newest":
           questions = await this.getNewestQuestionsFirst(page, limit);
           break;
-        case 'unanswered':
+        case "unanswered":
           questions = await this.getUnansweredQuestionsFirst(page, limit);
           break;
-        case 'active':
+        case "active":
           questions = await this.getActiveQuestionsFirst(page, limit);
           break;
         default:
-          throw new Error('Invalid order specified');
+          throw new Error("Invalid order specified");
       }
     }
-   
+
     const total = await Question.countDocuments();
     const results = await this.addTagToQuestion(questions);
     return {
       questions: results,
-      total
+      total,
     };
-
   }
 
   static async addTagToQuestion(questions) {
-    const results = await Promise.all(questions.map(async (question) => {
-      const tags = await Tag.find({ _id: { $in: question.tags } }).lean();
-      return {
-        question:question,
-        tags: tags
-      };
-    }));
+    const results = await Promise.all(
+      questions.map(async (question) => {
+        const tags = await Tag.find({ _id: { $in: question.tags } }).lean();
+        return {
+          question: question,
+          tags: tags,
+        };
+      })
+    );
 
     return results;
   }
-  
 
-  
   static async searchQuestions(query) {
     const tagPattern = /\[([^\]]+)\]/g;
     let tagNames = [];
     let match;
-  
+
     // Function to escape special characters in regular expressions
     const escapeRegExp = (string) => {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     };
-  
+
     while ((match = tagPattern.exec(query))) {
       tagNames.push(match[1].toLowerCase());
     }
-  
-    const words = query.replace(tagPattern, ' ').trim().toLowerCase().split(/\s+/).filter(word => word);
-  
+
+    const words = query
+      .replace(tagPattern, " ")
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word);
+
     let searchConditions = [];
-  
+
     if (tagNames.length) {
       // Transform each tagName into a case-insensitive regular expression
-      const regexTagNames = tagNames.map(tagName => new RegExp('^' + escapeRegExp(tagName) + '$', 'i'));
-  
+      const regexTagNames = tagNames.map(
+        (tagName) => new RegExp("^" + escapeRegExp(tagName) + "$", "i")
+      );
+
       // Query the Tag collection to get the tag IDs
       const tags = await Tag.find({ name: { $in: regexTagNames } }).lean();
       if (tags.length > 0) {
-        searchConditions.push({ tags: { $in: tags.map(tag => tag._id) } });
+        searchConditions.push({ tags: { $in: tags.map((tag) => tag._id) } });
       }
     }
-  
+
     if (words.length) {
-      const wordConditions = words.map(word => ({
+      const wordConditions = words.map((word) => ({
         $or: [
-          { title: { $regex: `\\b${word}\\b`, $options: 'i' } },
-          { text: { $regex: `\\b${word}\\b`, $options: 'i' } }
-        ]
+          { title: { $regex: `\\b${word}\\b`, $options: "i" } },
+          { text: { $regex: `\\b${word}\\b`, $options: "i" } },
+        ],
       }));
       searchConditions.push(...wordConditions);
     }
@@ -352,157 +356,162 @@ static async getActiveQuestionsFirst(page, limit) {
     if (searchConditions.length === 0) {
       return [];
     }
-  
-    const searchCriteria = searchConditions.length > 0 ? { $or: searchConditions } : {};
-  
-    const searchResult = await Question.find(searchCriteria).sort({ ask_date_time: -1 }).exec(); 
-    return searchResult && searchResult.length > 0 
-      ? await this.addTagToQuestion(searchResult) 
+
+    const searchCriteria =
+      searchConditions.length > 0 ? { $or: searchConditions } : {};
+
+    const searchResult = await Question.find(searchCriteria)
+      .sort({ ask_date_time: -1 })
+      .exec();
+    return searchResult && searchResult.length > 0
+      ? await this.addTagToQuestion(searchResult)
       : searchResult;
   }
-  
-
 
   static async getTagsWithCounts() {
     const tags = await Tag.find({});
-    const counts = await Promise.all(tags.map(async tag => {
-      const count = await Question.countDocuments({ tags: tag._id });
-      return {
-        tid: tag._id,
-        name: tag.name,
-        count: count
-      };
-    }));
+    const counts = await Promise.all(
+      tags.map(async (tag) => {
+        const count = await Question.countDocuments({ tags: tag._id });
+        return {
+          tid: tag._id,
+          name: tag.name,
+          count: count,
+        };
+      })
+    );
     return counts;
   }
-
 
   static async getTagsByIds(tagIds) {
     return await Tag.find({ _id: { $in: tagIds } });
   }
 
-
   static async getCommentsByQuestionId(qid, page, limit) {
     try {
-        const skip = (page - 1) * limit;
-        const questionForCount = await Question.findById(qid).exec();
-        // Populate comments directly in the query
-        const question = await Question.findById(qid)
-                                       .populate({
-                                           path: 'comments',
-                                           model: Comment, // Ensure this is the correct model name
-                                           options: {
-                                               sort: { 'dateOfComment': -1 }, // Sort by date in descending order
-                                               skip,
-                                               limit
-                                           }
-                                       })
-                                       .exec();
+      const skip = (page - 1) * limit;
+      const questionForCount = await Question.findById(qid).exec();
+      // Populate comments directly in the query
+      const question = await Question.findById(qid)
+        .populate({
+          path: "comments",
+          model: Comment, // Ensure this is the correct model name
+          options: {
+            sort: { dateOfComment: -1 }, // Sort by date in descending order
+            skip,
+            limit,
+          },
+        })
+        .exec();
 
-        if (!question) {
-            throw new Error('Question not found');
-        }
+      if (!question) {
+        throw new Error("Question not found");
+      }
 
-        const totalComments = questionForCount.comments.length;
+      const totalComments = questionForCount.comments.length;
 
-        // Return the comments and total comment count
-        return {
-            comments: question.comments,
-            total: totalComments
-        };
+      // Return the comments and total comment count
+      return {
+        comments: question.comments,
+        total: totalComments,
+      };
     } catch (error) {
-        console.error('Error in getCommentsByQuestionId:', error);
-        throw error;
+      console.error("Error in getCommentsByQuestionId:", error);
+      throw error;
     }
-}
+  }
 
-
-static async getCommentsByAnsId(ansId, page, limit) {
-  try {
+  static async getCommentsByAnsId(ansId, page, limit) {
+    try {
       const skip = (page - 1) * limit;
       const answerForCount = await Answer.findById(ansId).exec();
       // Populate comments directly in the query
       const answer = await Answer.findById(ansId)
-                                     .populate({
-                                         path: 'comments',
-                                         model: Comment, // Ensure this is the correct model name
-                                         options: {
-                                             sort: { 'dateOfComment': -1 }, // Sort by date in descending order
-                                             skip,
-                                             limit
-                                         }
-                                     })
-                                     .exec();
+        .populate({
+          path: "comments",
+          model: Comment, // Ensure this is the correct model name
+          options: {
+            sort: { dateOfComment: -1 }, // Sort by date in descending order
+            skip,
+            limit,
+          },
+        })
+        .exec();
 
       if (!answer) {
-          throw new Error('Answer not found');
+        throw new Error("Answer not found");
       }
 
       const totalComments = answerForCount.comments.length;
 
       // Return the comments and total comment count
       return {
-          comments: answer.comments,
-          total: totalComments
+        comments: answer.comments,
+        total: totalComments,
       };
-  } catch (error) {
-      console.error('Error in getCommentsByQuestionId:', error);
+    } catch (error) {
+      console.error("Error in getCommentsByQuestionId:", error);
       throw error;
+    }
   }
-}
 
+  static async postCommentForAnsId(text, author, authorid, ansId) {
+    try {
+      // Create a new Comment document
+      const newComment = new Comment({ text, author, authorid });
+      await newComment.save();
 
+      // Find the corresponding Answer and update its comments array
+      const answer = await Answer.findById(ansId);
+      if (!answer) {
+        throw new Error("Answer not found");
+      }
 
+      answer.comments.push(newComment._id);
+      await answer.save();
 
-static async postCommentForAnsId(text,author,authorid,ansId) {
-
-  try {
-    // Create a new Comment document
-    const newComment = new Comment({ text, author, authorid });
-    await newComment.save();
-
-    // Find the corresponding Answer and update its comments array
-    const answer = await Answer.findById(ansId);
-    if (!answer) {
-        throw new Error('Answer not found');
+      return newComment; // Or return some other appropriate response
+    } catch (error) {
+      console.error("Error in createCommentAndUpdateAnswer:", error);
+      throw error;
     }
+  }
 
-    answer.comments.push(newComment._id);
-    await answer.save();
+  static async postCommentForQid(text, author, authorid, qid) {
+    try {
+      // Create a new Comment document
+      const newComment = new Comment({ text, author, authorid });
+      await newComment.save();
 
-    return newComment; // Or return some other appropriate response
-} catch (error) {
-    console.error('Error in createCommentAndUpdateAnswer:', error);
-    throw error;
-}
-}
+      // Find the corresponding Question and update its comments array
+      const question = await Question.findById(qid);
+      if (!question) {
+        throw new Error("Question not found");
+      }
 
-static async postCommentForQid(text,author,authorid,qid) {
+      question.comments.push(newComment._id);
+      await question.save();
 
-  try {
-    // Create a new Comment document
-    const newComment = new Comment({ text, author, authorid });
-    await newComment.save();
-
-    // Find the corresponding Question and update its comments array
-    const question = await Question.findById(qid);
-    if (!question) {
-        throw new Error('Question not found');
+      return newComment; // Or return some other appropriate response
+    } catch (error) {
+      console.error("Error in createCommentAndUpdateQuestion:", error);
+      throw error;
     }
+  }
 
-    question.comments.push(newComment._id);
-    await question.save();
-
-    return newComment; // Or return some other appropriate response
-} catch (error) {
-    console.error('Error in createCommentAndUpdateQuestion:', error);
-    throw error;
-}
- 
-}
-
-
-
+  static async updateCommentVoteCount(cid, votes) {
+    try {
+      const comment = await Comment.findById(cid);
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+      comment.votes = votes;
+      await comment.save();
+    } catch (error) {
+      console.error("Error in createCommentAndUpdateQuestion:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = ApplicationModel;

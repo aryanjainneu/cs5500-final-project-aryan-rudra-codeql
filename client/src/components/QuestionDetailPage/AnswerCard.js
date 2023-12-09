@@ -35,7 +35,13 @@ const AnswerCard = ({ answer, user }) => {
         <div className="answerText">{parseTextWithHyperlinks(answer.text)}</div>
         <AnswerAuthorInfo answer={answer} />
       </div>
-      <CommentsSection user={user} fetchData={fetchData} postComment ={postComment} />
+      <div className="answerCommentSectionContainer">
+        <CommentsSection
+          user={user}
+          fetchData={fetchData}
+          postComment={postComment}
+        />
+      </div>
     </div>
   );
 };

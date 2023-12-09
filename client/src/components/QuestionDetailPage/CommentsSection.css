@@ -1,92 +1,87 @@
 /* Style for the main comments section container */
 .commentsSection {
- 
-    margin-top: 20px;
-    padding: 15px;
-   
-    width: 100%;
-
+  margin: 20px;
+  width: 100%;
 }
-.commentList{
-    height: 50%; /* Set a max-height for scrollable area */
-    overflow-y: auto; /* Makes the comment list scrollable */
-    border: 2px solid rgb(233, 229, 229);
-    border-radius: 5px;
+.commentList {
+  height: 50%; /* Set a max-height for scrollable area */
+  overflow-y: auto; /* Makes the comment list scrollable */
+  border: 2px solid rgb(233, 229, 229);
+  border-radius: 5px;
 }
 
 /* Style for the loading message */
 .loadingComments {
-    text-align: center;
-    color: #555;
-    font-size: 1em;
-    margin-top: 20px;
+  text-align: center;
+  color: #555;
+  font-size: 1em;
+  margin-top: 20px;
 }
 
 /* Style for the section where users can post a new comment */
 .postCommentSection {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 /* Style for the textarea where users write their new comment */
 .postCommentSection input {
-    width:100%;
-    margin: 5px;
-    border: 2px solid rgb(233, 229, 229);
-    border-radius: 4px;
-    resize: vertical; /* Allows vertical resizing */
+  width: 100%;
+  margin: 5px;
+  border: 2px solid rgb(233, 229, 229);
+  border-radius: 4px;
+  resize: vertical; /* Allows vertical resizing */
 }
 
 /* Style for the button used to post a new comment */
 .postCommentSection button {
-    background-color: #4CAF50; /* Green background */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 15px;
-
+  background-color: #4caf50; /* Green background */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
 }
 
 .postCommentSection button:hover {
-    background-color: #45a049; /* Darker green on hover */
+  background-color: #45a049; /* Darker green on hover */
 }
 
 .pagination {
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    justify-items: center;
-    justify-content: space-between;
-    padding: 10px;
-  }
-  
-  .pagination button {
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .pagination button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-items: center;
+  justify-content: space-between;
+  padding: 10px;
+}
 
-  .noComments{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-  }
-  .commentInputContainer{
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin-bottom: 20px;
-  }
+.pagination button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.noComments {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.commentInputContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 20px;
+}
 
 /* 
 .vote-container {

@@ -51,7 +51,7 @@
   justify-content: space-evenly;
   padding: 10px;
   width: 100%;
-  box-shadow: 0 -5px 5px -5px rgba(0, 0, 0, 0.75);
+  /* box-shadow: 0 -5px 5px -5px rgba(0, 0, 0, 0.75); */
 }
 
 .pagination button {
@@ -117,4 +117,17 @@
   padding: 5px 10px;
   color: #555;
   font-size: 11px;
+}
+
+.paginationContainer{
+  box-shadow: 0 -5px 5px -5px rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.questionCommentSectionContainer{
+  display: flex;
+  width: 90%;
+  flex-direction: column;
 }

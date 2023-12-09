@@ -273,9 +273,9 @@ class ApplicationController {
       const {author,text,ansId} = req.body;
       const authorid = req.session.userId;
      const comment = await ApplicationModel.postCommentForAnsId(text,author,authorid,ansId);
-      res.status(201).json(
+      res.status(201).json({
         comment,
-        {message:'comment created successfully'});
+        message:'comment created successfully'});
     } catch (error) {
       res.status(500).send(error.message);
     }
@@ -289,6 +289,17 @@ class ApplicationController {
       res.status(201).json({
         comment,  
         message:'comment created successfully'});
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+  static async updateCommentVoteCount(req, res) {
+    try {
+      const {cid,votes} = req.body.params;
+      await ApplicationModel.updateCommentVoteCount(cid,votes);
+      res.status(201).json({ 
+        message:'vote increased successfully'});
     } catch (error) {
       res.status(500).send(error.message);
     }

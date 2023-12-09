@@ -27,6 +27,14 @@
 
 .answerCardContainer {
   display: flex;
+  width: 100% !important;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  align-items:center;
+}
+.answerCommentSectionContainer{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 80% ;
 }

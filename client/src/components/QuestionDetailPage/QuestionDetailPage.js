@@ -87,21 +87,23 @@ const QuestionDetailPage = ({
               <AnswerList answers={answers} user={user} />
             )}
           </div>
-          <div className="pagination">
-            <button
-              className="vote-arrow"
-              onClick={handlePrevClick}
-              disabled={currentPaginationPage === 1}
-            >
-              Prev
-            </button>
-            <button
-              className="vote-arrow"
-              onClick={handleNextClick}
-              disabled={currentPaginationPage === totalPages}
-            >
-              Next
-            </button>
+          <div className="paginationContainer">
+            <div className="pagination">
+              <button
+                className="vote-arrow"
+                onClick={handlePrevClick}
+                disabled={currentPaginationPage === 1}
+              >
+                Prev
+              </button>
+              <button
+                className="vote-arrow"
+                onClick={handleNextClick}
+                disabled={currentPaginationPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
           </div>
 
           <div id="answerButton">

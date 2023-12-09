@@ -1,10 +1,18 @@
 import axios from "axios";
 class ApplicationModel {
+
+  static instance;
   constructor() {
+
+    if (ApplicationModel.instance) {
+      return ApplicationModel.instance;
+    }
     this.api = axios.create({
       baseURL: "http://localhost:8000/api",
       withCredentials: true,
     });
+
+    ApplicationModel.instance = this;
   }
 
   async getQuestions() {
@@ -122,6 +130,18 @@ class ApplicationModel {
   async incrementViewCount(qid) {
     try {
       const response = await this.api.put(`/questions/${qid}/views`);
+      return response.data;
+    } catch (error) {
+      console.error("Error incrementing question views", error);
+      throw error;
+    }
+  }
+
+  async updateCommentVoteCount(cid,votes) {
+    try {
+      const response = await this.api.put(`/comment/upvote`,{
+        params: { cid, votes },
+      });
       return response.data;
     } catch (error) {
       console.error("Error incrementing question views", error);
@@ -367,7 +387,7 @@ class ApplicationModel {
   convertCommentDateStringToDate(item) {
     const askDateConverted = new Date(item.dateOfComment);
     if (isNaN(askDateConverted.getTime())) {
-      throw new Error(`Invalid date string received: ${item.question.askDate}`);
+      throw new Error(`Invalid date string received: ${item.dateOfComment}`);
     }
     return {
       ...item,

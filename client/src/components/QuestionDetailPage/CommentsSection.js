@@ -16,7 +16,7 @@ const CommentsSection = ({ user, fetchData, postComment }) => {
     try {
       const data = await fetchData(page, PAGE_SIZE);
       setComments(data.comments);
-      setTotalPages(data.totalPages); // Calculate total pages
+      setTotalPages(data.totalPages);
     } catch (error) {
       setLoadingError(error.message || "Failed to fetch question or answers:");
     }
@@ -43,25 +43,21 @@ const CommentsSection = ({ user, fetchData, postComment }) => {
   const handlePostComment = async () => {
     if (validateComment()) {
       try {
-        const response = await postComment(newComment); 
+        const response = await postComment(newComment);
         const postedComment = response.comment;
         setNewComment("");
-  
-    
+
         if (currentPage === 1) {
-        
           const updatedComments = [postedComment, ...comments];
-  
-          
+
           if (updatedComments.length > PAGE_SIZE) {
             updatedComments.pop();
           }
-  
+
           setComments(updatedComments);
         } else {
           setCurrentPage(1);
         }
-        
       } catch (error) {
         setCommentValidationError(error.message);
       }
@@ -97,7 +93,12 @@ const CommentsSection = ({ user, fetchData, postComment }) => {
           <div className="noComments">No comments to display.</div>
         ) : (
           comments.map((comment) => (
-            <Comment key={comment._id} comment={comment} />
+            <Comment
+              key={comment._id}
+              user={user}
+              comment={comment}
+              
+            />
           ))
         )}
       </div>
