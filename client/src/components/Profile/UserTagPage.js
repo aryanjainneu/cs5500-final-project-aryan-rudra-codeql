@@ -11,7 +11,8 @@ const UserTagPage = () => {
     try {
         await appModel.deleteUserTag(tid); // Replace with your actual delete logic
         // Update the state to reflect the deleted tag
-        setTags(prevTags => prevTags.filter(tag => tag._id !== tid));
+        const updatedTags = tags.filter(tag => tag.tid !== tid);
+        setTags(updatedTags);
     } catch (error) {
         console.error("Error deleting tag:", error);
         throw error
