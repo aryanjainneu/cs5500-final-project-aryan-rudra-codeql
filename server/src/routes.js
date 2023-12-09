@@ -55,6 +55,12 @@ router.get(
   ApplicationController.getTagsCreatedByUser
 );
 
+router.put( "/user/updatetag/",isAuthenticated,
+ApplicationController.updateUserTag);
+
+
+router.delete( "/user/deletetag/:tid",isAuthenticated,
+ApplicationController.deleteUserTag);
 // POST a new answer
 router.post("/answers", isAuthenticated, ApplicationController.addAnswer);
 

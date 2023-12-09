@@ -643,6 +643,58 @@ class ApplicationModel {
     }
   }
 
+
+  static async updateUserTag(userId, tid, newName) {
+    try {
+        // Find the tag by ID
+        const tag = await Tag.findById(tid);
+        if (!tag) {
+            throw new Error("Tag not found");
+        }
+
+        // Check if the tag is being used by questions from other users
+        const isTagUsedByOthers = await Question.exists({ tags: tid, authorid: { $ne: userId } });
+        if (isTagUsedByOthers) {
+            throw new Error("Editing not allowed: Tag is being used by other users");
+        }
+
+        // Update the tag's name
+        tag.name = newName;
+        await tag.save();
+        return tag;
+    } catch (error) {
+        console.error("Error in updateUserTag:", error);
+        throw error;
+    }
+}
+
+
+
+static async  deleteUserTag(tagId, userId) {
+    try {
+
+        const tag = await Tag.findById(tagId);
+        if (!tag) {
+            throw new Error('Tag not found');
+        }
+
+        
+
+        const isTagUsedInQuestions = await Question.exists({ tags: tagId, authorid: { $ne: userId } });
+        if (isTagUsedInQuestions) {
+            throw new Error('Tag is in use by other users and cannot be deleted');
+        }
+
+
+        await Tag.deleteOne({ _id: tagId });
+        return { message: 'Tag successfully deleted' };
+    } catch (error) {
+        console.error('Error in deleteTagIfUnusedByOthers:', error.message);
+        throw error;
+    }
+}
+
+
   static async updateQuestionVoteCount(qid, deltaRep, deltaVote) {
     try {
       const question = await Question.findById(qid);

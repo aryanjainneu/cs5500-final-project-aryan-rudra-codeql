@@ -7,6 +7,16 @@ const appModel = new ApplicationModel();
 const UserTagPage = () => {
   const [tags, setTags] = useState([]);
 
+  const handleDelete = async (tid) => {
+    try {
+        await appModel.deleteUserTag(tid); // Replace with your actual delete logic
+        // Update the state to reflect the deleted tag
+        setTags(prevTags => prevTags.filter(tag => tag._id !== tid));
+    } catch (error) {
+        console.error("Error deleting tag:", error);
+        throw error
+    }
+};
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -29,7 +39,7 @@ const UserTagPage = () => {
         <div className="tagGrid">
           {tags && tags.length > 0 ? (
             tags.map((tag) => {
-              return <UserTagCard key={tag.tid} tag={tag} />;
+              return <UserTagCard key={tag.tid} tag={tag} handleDelete={handleDelete}/>;
             })
           ) : (
             <div>No Tags available.</div>

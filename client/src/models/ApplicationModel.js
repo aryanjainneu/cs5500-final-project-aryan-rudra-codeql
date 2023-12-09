@@ -239,6 +239,28 @@ class ApplicationModel {
     }
   }
 
+  async updateUserTag(tid,name) {
+    try {
+      const response = await this.api.put(`user/updatetag`,{
+        params: { tid,name },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error updating tag", error);
+      throw error;
+    }
+  }
+
+  async deleteUserTag(tid) {
+    try {
+      const response = await this.api.delete(`user/deletetag/${tid}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting tag", error);
+      throw error;
+    }
+  }
+
   async getTagsCreatedByUser() {
     try {
       const response = await this.api.get("user/tags");

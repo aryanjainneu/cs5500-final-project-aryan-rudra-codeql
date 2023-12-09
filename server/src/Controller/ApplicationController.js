@@ -428,6 +428,33 @@ class ApplicationController {
       res.status(500).send(error.message);
     }
   }
+
+  static async updateUserTag(req, res) {
+    try {
+      const { tid, name } = req.body.params;
+      const userid = req.session.userId;
+      await ApplicationModel.updateUserTag(userid,tid, name);
+      res.status(201).json({
+        message: "Tag successfully edited",
+      });
+    } catch (error) {
+      res.status(500).send(error.message || 'Tag Update Failed');
+    }
+  }
+  static async deleteUserTag(req, res) {
+    try {
+      const { tid } = req.params;
+      const userid = req.session.userId;
+      await ApplicationModel.deleteUserTag(tid,userid);
+      res.status(201).json({
+        message: "Tag successfully deleted",
+      });
+    } catch (error) {
+      res.status(500).send(error.message || 'Tag Update Failed');
+    }
+  }
 }
+
+
 
 module.exports = ApplicationController;
