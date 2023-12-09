@@ -169,7 +169,21 @@ body {
   overflow: hidden;
   box-sizing: border-box;
   box-shadow: 2px 2px 5px rgba(0, 0, 0,1);
+  transition: all 0.3s ease;
 }
+
+.tagNode.editMode {
+  transform: scale(1.5); /* Increase size */
+  z-index: 10; /* Ensure it's above other elements */
+  box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Optional: Add shadow for pop effect */
+  /* You can add more styling as needed */
+}
+
+.tagNode.editMode input[type="text"] {
+  width: calc(100% - 20px); /* Adjust width as needed */
+  /* Other styles... */
+}
+
 
 .tagName{
   color: blue;
@@ -180,8 +194,9 @@ body {
   align-items: center;
   justify-items: center;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;  
+  /* grid-template-columns: 1fr 1fr 1fr; */
+  grid-template-columns: repeat(3, 1fr);  /* Adjust minmax as needed */
+  gap: 30px;
 }
 
 
@@ -220,6 +235,7 @@ body {
   height: 80%;
   width:90%;
   overflow-y: auto;
+  overflow: visible;
   padding: 10px;
 }
 

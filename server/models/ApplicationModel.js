@@ -49,7 +49,7 @@ class ApplicationModel {
       authorid: authorId,
       ask_date_time: askDate,
     });
-    user.qid.push(question._id); // Add the new question's ID
+    user.qids.push(question._id); // Add the new question's ID
     await user.save();
 
     return question;
@@ -177,6 +177,35 @@ class ApplicationModel {
     }
   }
 
+  static async getAnswersGivenByUser(authorid, page = 1, limit = 5) {
+    try {
+        // Check if authorid is provided
+        if (!authorid) {
+            throw new Error("Author ID is required");
+        }
+
+        // Count the total number of answers by the user
+        const total = await Answer.countDocuments({ authorid: authorid }).exec();
+
+        // Find answers by the user with pagination
+        const answers = await Answer.find({ authorid: authorid })
+            .sort({ ans_date_time: -1 }) // Sorting by answer date in descending order
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .exec();
+
+        // Convert to objects including virtuals
+        const formattedAnswers = answers.map((answer) =>
+            answer.toObject({ virtuals: true })
+        );
+
+        return { answers: formattedAnswers, total };
+    } catch (error) {
+        console.error("Error in getAnswersGivenByUser:", error);
+        throw error;
+    }
+}
+
   static async getQuestionsByTag(tid) {
     const taggedQuestions = await Question.find({ tags: tid }).sort({
       ask_date_time: -1,
@@ -299,6 +328,25 @@ class ApplicationModel {
 
     const total = await Question.countDocuments();
     const results = await this.addTagToQuestion(questions);
+    return {
+      questions: results,
+      total,
+    };
+  }
+
+  static async getQuestionsWithTagsForCurrentUser(page = 1, limit = 5, userid) {
+    if (!userid) {
+      throw new Error("User ID is required");
+    }
+    const query = { authorid: userid };
+    const questions = await Question.find(query)
+      .sort({ ask_date_time: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .exec();
+    const total = await Question.countDocuments(query);
+    const results = await this.addTagToQuestion(questions);
+
     return {
       questions: results,
       total,
@@ -434,6 +482,36 @@ class ApplicationModel {
     );
     return counts;
   }
+  
+
+  static async getTagsCreatedByUser(userid) {
+    if (!userid) {
+        throw new Error("User ID is required");
+    }
+
+    // Fetch user to get the list of tag IDs they've created
+    const user = await User.findById(userid).select('tids').lean();
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    // Find tags based on the user's tag IDs
+    const tags = await Tag.find({ _id: { $in: user.tids } });
+
+    const counts = await Promise.all(
+        tags.map(async (tag) => {
+            const count = await Question.countDocuments({ tags: tag._id });
+            return {
+                tid: tag._id,
+                name: tag.name,
+                count: count,
+            };
+        })
+    );
+
+    return counts;
+}
+
 
   static async getTagsByIds(tagIds) {
     return await Tag.find({ _id: { $in: tagIds } });

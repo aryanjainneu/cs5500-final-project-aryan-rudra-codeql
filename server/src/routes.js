@@ -41,6 +41,20 @@ router.get(
   ApplicationController.getQuestionWithTags
 );
 
+router.get(
+  "/user/questionwithtags/",isAuthenticated,
+  ApplicationController.getQuestionsWithTagsForCurrentUser
+);
+router.get(
+  "/user/answers/",isAuthenticated,
+  ApplicationController.getAnswersGivenByUser
+);
+
+router.get(
+  "/user/tags/",isAuthenticated,
+  ApplicationController.getTagsCreatedByUser
+);
+
 // POST a new answer
 router.post("/answers", isAuthenticated, ApplicationController.addAnswer);
 

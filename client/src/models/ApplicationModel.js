@@ -92,6 +92,37 @@ class ApplicationModel {
     }
   }
 
+
+
+  async getAnswersGivenByUser(page = 1, limit = 5) {
+    //const response = await this.api.get(`/questions/${qid}/answers`);
+    try {
+      const response = await this.api.get(`/user/answers`, {
+        params: { page, limit },
+      });
+      const answers = response.data.answers.map((answer) => {
+        const ansDateConverted = new Date(answer.ansDate);
+        if (isNaN(ansDateConverted.getTime())) {
+          throw new Error(`Invalid date string received: ${answer.ansDate}`);
+        }
+        return {
+          ...answer,
+          ansDate: ansDateConverted,
+        };
+      });
+
+      return {
+        answers: answers,
+        total: response.data.total,
+        page: response.data.page,
+        totalPages: response.data.totalPages,
+      };
+    } catch (error) {
+      console.error("Error fetching questions with tags:", error);
+      throw error;
+    }
+  }
+
   async getQuestionsByTag(tid) {
     try {
       const response = await this.api.get(`/questions/tag/${tid}`);
@@ -208,6 +239,16 @@ class ApplicationModel {
     }
   }
 
+  async getTagsCreatedByUser() {
+    try {
+      const response = await this.api.get("user/tags");
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching tag with associated question count", error);
+      throw error;
+    }
+  }
+
   // async getQuestionsWithTags(filter) {
   //   try {
   //     const response = await this.api.get(`/questions/questionwithtags/${filter}`);
@@ -224,6 +265,31 @@ class ApplicationModel {
     try {
       const response = await this.api.get(
         `/questions/questionwithtags/${filter}`,
+        {
+          params: { page, limit },
+        }
+      );
+      const questionsWithDates = this.convertQuestionDateStringToDate(
+        response.data.questions
+      );
+
+      // Include the total number of questions and any other metadata returned by the API
+      return {
+        questions: questionsWithDates,
+        total: response.data.total,
+        page: response.data.page,
+        totalPages: response.data.totalPages,
+      };
+    } catch (error) {
+      console.error("Error fetching questions with tags:", error);
+      throw error;
+    }
+  }
+
+  async getQuestionsWithTagsForCurrentUser(filter, page = 1, limit = 5){
+    try {
+      const response = await this.api.get(
+        `/user/questionwithtags/`,
         {
           params: { page, limit },
         }

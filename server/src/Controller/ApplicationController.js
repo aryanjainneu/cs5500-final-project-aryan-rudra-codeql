@@ -91,6 +91,27 @@ class ApplicationController {
     }
   }
 
+
+
+  static async getAnswersGivenByUser(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const authorid = req.session.userId;
+      const { answers, total } = await ApplicationModel.getAnswersGivenByUser(
+        authorid,
+        page,
+        limit
+      );
+      res.json({ answers, total, page, totalPages: Math.ceil(total / limit) });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+
+
+
   static async getQuestionsByTag(req, res) {
     try {
       const questions = await ApplicationModel.getQuestionsByTag(
@@ -113,6 +134,29 @@ class ApplicationController {
         null,
         page,
         limit
+      );
+
+      res.json({
+        questions,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
+  static async getQuestionsWithTagsForCurrentUser(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 5;
+      const userId = req.session.userId;
+
+      const { questions, total } = await ApplicationModel.getQuestionsWithTagsForCurrentUser(
+        page,
+        limit,
+        userId
       );
 
       res.json({
@@ -190,6 +234,16 @@ class ApplicationController {
     }
   }
 
+  static async getTagsCreatedByUser(req, res) {
+    try {
+      const userid = req.session.userId;
+      const tagsWithCounts = await ApplicationModel.getTagsCreatedByUser(userid);
+      res.json(tagsWithCounts);
+    } catch (error) {
+      res.status(500).send(error.message);
+    }
+  }
+
   static async getTagsWithCounts(req, res) {
     try {
       const tagsWithCounts = await ApplicationModel.getTagsWithCounts();
@@ -223,9 +277,9 @@ class ApplicationController {
   static async login(req, res) {
     try {
       const { username, password } = req.body;
-      const user = await User.loginUser(username, password);
+      const {user,userid} = await User.loginUser(username, password);
 
-      req.session.userId = user._id;
+      req.session.userId = userid;
       res.json({ user });
     } catch (error) {
       console.error("Login error:", error.message);

@@ -13,6 +13,7 @@ import AskQuestionForm from "./components/NewQuestionPage/AskQuestionForm";
 import TaggedQuestionPage from "./components/TagPage/TaggedQuestionPage";
 import WelcomePage from "./Welcome";
 import SearchPage from "./components/HomePage/SearchPage";
+import UserProfile from "./components/Profile/UserProfile";
 const appModel = new ApplicationModel();
 
 const App = () => {
@@ -65,10 +66,6 @@ const App = () => {
       console.error("Failed to increment view count:", error);
     }
   };
-
- 
-
-
 
   const handleQuestionNavClick = async () => {
     try {
@@ -125,6 +122,12 @@ const App = () => {
                   setCurrentQID={setCurrentQID}
                   user={user}
                   setUser={setUser}
+                />
+              )}
+
+              {currentPage === "profilePage" && (
+                <UserProfile
+                  user={user}
                 />
               )}
 

@@ -17,12 +17,14 @@ userSchema.statics.loginUser = async function (username, password) {
     { username },
     { qids: 0, ansIds: 0, tids: 0 }
   ).lean();
+  const userid = user._id;
   if (!user || !(await bcrypt.compare(password, user.password))) {
     throw new Error("Invalid credentials");
   }
 
   delete user.password;
-  return user;
+  delete user._id;
+  return {user,userid}
 };
 
 module.exports = mongoose.model("User", userSchema);

@@ -1,0 +1,22 @@
+/* Additional styles for buttons */
+.editSaveButton {
+    background-color: green;
+    color: white;
+    /* Add more styling as needed */
+  }
+  
+  .cancelDeleteButton {
+    background-color: red;
+    color: white;
+    /* Add more styling as needed */
+  }
+  
+  /* General button styling */
+  .tagbutton {
+    margin: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
