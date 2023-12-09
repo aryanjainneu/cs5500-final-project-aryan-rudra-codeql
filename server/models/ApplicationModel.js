@@ -34,13 +34,20 @@ class ApplicationModel {
   static async getTags() {
     return await Tag.find({});
   }
-  static async addQuestion(title, text, tagsInput, askedBy, askDate) {
-    const tagIds = await this.addNewTags(tagsInput);
+  static async addQuestion(title, text, tagsInput, authorId, askDate) {
+    
+    const user = await User.findById(authorId);
+    const tagIds = await this.addNewTags(tagsInput,user);
+    const username = user.username;
+    if (!user) {
+      throw new Error("User not found");
+    }
     return await Question.create({
       title,
       text,
       tags: tagIds,
-      asked_by: askedBy,
+      asked_by: username,
+      authorid : authorId,
       ask_date_time: askDate,
     });
   }
@@ -54,19 +61,26 @@ class ApplicationModel {
     });
   }
 
-  static async addNewTags(tagInput) {
+  static async addNewTags(tagInput, user) {
     const tagIds = [];
     for (const tagName of tagInput) {
-      let tag = await Tag.findOne({
-        name: { $regex: new RegExp("^" + tagName + "$", "i") },
-      });
-      if (!tag) {
-        tag = await Tag.create({ name: tagName });
-      }
-      tagIds.push(tag._id);
+        let tag = await Tag.findOne({
+            name: { $regex: new RegExp("^" + tagName + "$", "i") },
+        });
+
+        if (!tag) {
+            // Only create a new tag if the user's reputation is 50 or higher
+            if (user.reputation < 50) {
+                throw new Error("Insufficient reputation to create new tags");
+            }
+            tag = await Tag.create({ name: tagName });
+        }
+        tagIds.push(tag._id);
     }
+
     return tagIds;
-  }
+}
+
 
   static async addAnswer(text, author, qid, date) {
     const answer = await Answer.create({

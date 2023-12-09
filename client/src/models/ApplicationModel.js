@@ -23,13 +23,12 @@ class ApplicationModel {
     }
   }
 
-  async addQuestion(title, text, tagsInput, askedBy, askDate) {
+  async addQuestion(title, text, tagsInput, askDate) {
     try {
       const response = await this.api.post("/questions", {
         title,
         text,
         tagsInput,
-        askedBy,
         askDate,
       });
       return response.data;

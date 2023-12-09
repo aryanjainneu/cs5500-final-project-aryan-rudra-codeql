@@ -12,12 +12,14 @@ class ApplicationController {
   }
 
   static async addQuestion(req, res) {
+
+    const authorId = req.session.userId;
     try {
       const question = await ApplicationModel.addQuestion(
         req.body.title,
         req.body.text,
         req.body.tagsInput,
-        req.body.askedBy,
+        authorId,
         req.body.askDate
       );
       res.status(201).json(question);

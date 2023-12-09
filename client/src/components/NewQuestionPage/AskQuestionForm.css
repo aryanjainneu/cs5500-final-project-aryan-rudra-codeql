@@ -1,21 +1,25 @@
 .fullHeightQuestionForm {
-    display:flex;
-    padding-left: 20%;
-    flex-direction: column;
-    justify-content: center; /* Centers items vertically */
-    align-items: left; /* Centers items horizontally */
-    height: 100vh;
-    width: 100vh;
-  }
+  display:flex;
+  padding-left: 20%;
+  flex-direction: column;
+  justify-content: center; /* Centers items vertically */
+  align-items: left; /* Centers items horizontally */
+  height: 100vh;
+  width: 100%;
+}
 
-  .askQuestionFormLabel {
-    font-weight: bold;
-    font-size: 1.2em;
-  }
-  
-  
-  .flexContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+.askQuestionFormLabel {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+
+.flexContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#submitQuestion{
+  width: fit-content;
+}

@@ -28,13 +28,14 @@ const App = () => {
   const [currentQID, setCurrentQID] = useState(null);
   const [currentTID, setCurrentTID] = useState(null);
 
-  const addNewQuestion = async (title, text, tagInputs, askedBy, askDate) => {
+  const addNewQuestion = async (title, text, tagInputs, askDate) => {
     try {
-      await appModel.addQuestion(title, text, tagInputs, askedBy, askDate);
+      await appModel.addQuestion(title, text, tagInputs, askDate);
       const updatedQuestions = await appModel.getQuestionsWithTags("newest");
       setQuestions(updatedQuestions);
     } catch (error) {
       console.error("Failed to perform operations on questions:", error);
+      throw error;
     }
   };
 
