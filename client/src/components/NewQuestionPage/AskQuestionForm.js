@@ -135,7 +135,7 @@ const AskQuestionForm = ({ addNewQuestion, setCurrentPage }) => {
         <br />
       </div>
       <div>
-        ß<small>Add Keywords separated by whitespace</small>
+        <small>Add Keywords separated by whitespace</small>
         <br />
         <input
           type="text"

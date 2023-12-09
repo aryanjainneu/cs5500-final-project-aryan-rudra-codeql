@@ -38,11 +38,10 @@ class ApplicationModel {
     }
   }
 
-  async addAnswer(text, author, qid, date) {
+  async addAnswer(text, qid, date) {
     try {
       const answerData = {
         text: text,
-        ansBy: author,
         qid: qid,
         ansDate: date,
       };

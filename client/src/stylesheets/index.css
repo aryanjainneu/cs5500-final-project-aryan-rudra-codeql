@@ -55,10 +55,8 @@ body {
 
 .fullHeightAnswerForm {
   display:flex;
-  padding-left: 20%;
   flex-direction: column;
   justify-content: center; /* Centers items vertically */
-  align-items: left; /* Centers items horizontally */
   height: 100vh;
   width: 100vh;
 }
@@ -210,6 +208,12 @@ body {
   color: red;
   font-size: 14px;
   font-weight: 300;
+}
+
+.flexContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 

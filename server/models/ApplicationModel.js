@@ -82,10 +82,15 @@ class ApplicationModel {
 }
 
 
-  static async addAnswer(text, author, qid, date) {
+  static async addAnswer(text, authorId, qid, date) {
+    const user = await User.findById(authorId);
+    if (!user) {
+      throw new Error("User not found");
+    }
     const answer = await Answer.create({
       text,
-      ans_by: author,
+      ans_by: user.username,
+      authorid:authorId,
       ans_date_time: date,
     });
     await Question.findByIdAndUpdate(qid, {

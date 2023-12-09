@@ -9,26 +9,27 @@ const NewAnswerPage = ({qid,setCurrentPage/*,setQuestions*/}) => {
     // const {qid} = useParams();
     // const navigate = useNavigate();
     const [errors, setErrors] = useState({  text: '', username: '' });
+    const [postError, setPostError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const username = e.target.answerUsernameInput.value.trim() ||null;
+    setPostError('');
     const text =  e.target.answerTextInput.value.trim()||null;
-    if(!formInputValidation(username,text)){
+    if(!formInputValidation(text)){
       try {
-        await appModel.addAnswer(text, username, qid, new Date());
+        await appModel.addAnswer(text, qid, new Date());
         // const updatedQuestions = await appModel.getQuestionsWithTags('newest');
         // setQuestions(updatedQuestions);
         setCurrentPage('questionDetail');
       } catch (error) {
-        console.error('Error submitting answer:', error);
+        setPostError(error.response.data||'error while posting answers')
       }
     }
 
   };
 
-  const formInputValidation =(username, text ) =>{
+  const formInputValidation =( text ) =>{
     let hasError = false;
     const newErrors = { text: '', username: '' };
       if(!text || text.length < 1) {
@@ -42,13 +43,7 @@ const NewAnswerPage = ({qid,setCurrentPage/*,setQuestions*/}) => {
           newErrors.text ='';
     }
       }
-    
-      if(!username || username.length < 1) {
-          newErrors.username = 'Username cannot be empty';
-          hasError = true;
-      } else {
-          newErrors.username = ''; // clear error message
-      }
+  
       setErrors(newErrors)
       return hasError;
    
@@ -56,17 +51,6 @@ const NewAnswerPage = ({qid,setCurrentPage/*,setQuestions*/}) => {
 
   return (
     <form className="fullHeightAnswerForm" onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="answerUsernameInput" className="askQuestionFormLabel">
-          Username<span className="requiredField">*</span>
-        </label>
-        <br /><br />
-      </div>
-      <div>
-        <input type="text" id="answerUsernameInput" name="formTitleInput" style={{width: '50%'}}  />
-        <div id="userNameError" className="requiredField">{errors.username}</div>
-        <br /><br /><br />
-      </div>
       <div>
         <label htmlFor="answerTextInput" className="askQuestionFormLabel">
           Answer Text<span className="requiredField">*</span>
@@ -82,6 +66,8 @@ const NewAnswerPage = ({qid,setCurrentPage/*,setQuestions*/}) => {
         <button id="submitNewAnswer" type="submit" className="buttonStyle">Post Answer</button>
         <label className="requiredField"><span className="requiredField">*</span> indicate mandatory fields</label>
       </div>
+
+      <div className="error">{postError}</div>
     </form>
   );
 };

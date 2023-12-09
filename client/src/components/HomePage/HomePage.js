@@ -24,11 +24,11 @@ const HomePage = ({
   totalQuestionCount,
   setTotalQuestionCount,
 }) => {
-  const [loading, setLoading] = useState(false);
+  
   const [currentPaginationPage, setCurrentPaginationPage] = useState(1);
   const [loadingError, setLoadingError] = useState("");
   const fetchQuestions = async (page) => {
-    setLoading(true);
+    setLoadingError('');
     try {
       const data = await appModel.getQuestionsWithTags(
         "newest",
@@ -39,10 +39,8 @@ const HomePage = ({
       setQuestions(data.questions);
       setTotalPages(data.totalPages);
     } catch (error) {
-      setLoadingError("Error Loading Questions");
-    } finally {
-      setLoading(false);
-    }
+      setLoadingError(error.response.data||"Error Loading Questions");
+    } 
   };
   const handleNextClick = () => {
     const nextPage = currentPaginationPage + 1;
@@ -76,9 +74,7 @@ const HomePage = ({
         filterQuestion={filterQuestion}
       />
       <div className="questionListContainer">
-        {loading ? (
-          <div>Loading questions...</div>
-        ) : loadingError ? (
+        { loadingError ? (
           <div className="error">{loadingError}</div> // Display error message
         ) : (
           <QuestionList

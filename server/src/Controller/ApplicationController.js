@@ -49,17 +49,18 @@ class ApplicationController {
   }
 
   static async addAnswer(req, res) {
+    const authorId = req.session.userId;
     try {
-      const { text, ansBy, qid, ansDate } = req.body;
+      const { text, qid, ansDate } = req.body;
       const answer = await ApplicationModel.addAnswer(
         text,
-        ansBy,
+        authorId,
         qid,
         new Date(ansDate)
       );
       res.status(201).json(answer);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).send(error.message);
     }
   }
 
